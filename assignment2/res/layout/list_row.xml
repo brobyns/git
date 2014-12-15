@@ -70,11 +70,21 @@
 
     <TextView
         android:id="@+id/members"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/admin"
         android:layout_toRightOf="@+id/thumbnail"
         android:text="@string/members"
+        android:textColor="#343434"
+        android:textSize="10dip" />
+    
+    <TextView
+        android:id="@+id/membernames"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/adminName"
+        android:layout_toRightOf="@+id/members"
+        android:text="@string/no_members"
         android:textColor="#343434"
         android:textSize="10dip" />
 

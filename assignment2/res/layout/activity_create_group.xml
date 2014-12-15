@@ -13,16 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/CreateGroupTitle"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="#ea974e"
-            android:gravity="center"
-            android:text="@string/create_group_title"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -38,10 +28,6 @@
             android:id="@+id/groupName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/groupsLayout"
-            android:layout_marginTop="28dp"
             android:ems="10"
             android:hint="@string/placeholder_groupname"
             android:inputType="text" />

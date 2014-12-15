@@ -14,16 +14,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/GroupsTitle"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="#ea974e"
-            android:gravity="center"
-            android:text="@string/groups_title"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp" />
-
         <ListView
             android:id="@android:id/list"
             android:layout_width="fill_parent"

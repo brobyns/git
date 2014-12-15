@@ -1,13 +1,15 @@
 package org.khl.assignment2;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import org.khl.assignment2.adapter.GroupDetailAdapter;
 
+import service.FetchData;
+
+import model.Group;
+import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
-import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,30 +23,35 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class GroupDetailActivity extends ListActivity implements OnItemClickListener{
 	private TextView memberName;
-	private Facade facade = new FacadeImpl();
+	private Facade facade;
 	private ListView listView;
 	private GroupDetailAdapter detailAdapt;
+	private FetchData fetchData;
+	private int groupid;
+	private Group group;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_detail);
+        Bundle b = getIntent().getExtras();
+        groupid = b.getInt(MainActivity.GROUP_ID);
+        fetchNewData();
+        String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
+		facade = new FacadeImpl(dbWriterType);
         initializeComponents();
+		
     }
+	
+	private void fetchNewData(){
+		fetchData = new FetchData(this.getApplicationContext());
+		fetchData.execute();
+	}
 	
 	private void initializeComponents(){
 		memberName = (TextView)findViewById(R.id.memberName);
 		listView = (ListView)findViewById(android.R.id.list);
-		ArrayList<HashMap<String,String>> data = new ArrayList<HashMap<String,String>>();
-		HashMap<String,String> map  = new HashMap<String,String>();
-		map.put("memberName", "bram");
-		map.put("amount", "22.90");
-		HashMap<String,String> map2  = new HashMap<String,String>();
-		map2.put("memberName", "user2");
-		map2.put("amount", "10.00");
-		data.add(map);
-		data.add(map2);
-		detailAdapt=new GroupDetailAdapter(this, data);
+		detailAdapt=new GroupDetailAdapter(this, facade.getMembersInGroup(groupid), facade);
 		listView.setAdapter(detailAdapt);
 	}
 	

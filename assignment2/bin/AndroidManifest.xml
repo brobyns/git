@@ -4,6 +4,9 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-sdk
         android:minSdkVersion="10"
         android:targetSdkVersion="19" />
@@ -15,23 +18,32 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/groups_title" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity 
-             android:name="org.khl.assignment2.CreateGroupActivity"
-             android:windowSoftInputMode="adjustPan">
-            </activity>
-            <activity 
-             android:name="org.khl.assignment2.GroupDetailActivity">
-            </activity>
-            <activity 
-             android:name="org.khl.assignment2.AddExpenseActivity">
-            </activity>
+        <activity
+            android:name="org.khl.assignment2.CreateGroupActivity"
+            android:label="@string/create_group_title"
+            android:windowSoftInputMode="adjustPan" >
+        </activity>
+        <activity
+            android:name="org.khl.assignment2.GroupDetailActivity"
+            android:label="@string/group_detail_title" >
+        </activity>
+        <activity
+            android:name="org.khl.assignment2.AddExpenseActivity"
+            android:label="@string/add_expense_title"
+            android:windowSoftInputMode="adjustPan" >
+        </activity>
+        <activity
+            android:name="org.khl.assignment2.SettingsActivity"
+            android:label="@string/settings_title"
+            android:windowSoftInputMode="adjustPan" >
+        </activity>
     </application>
 
 </manifest>

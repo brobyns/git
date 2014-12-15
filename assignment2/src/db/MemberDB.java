@@ -12,8 +12,6 @@ public class MemberDB {
 	
 	private MemberDB(){
 		members = new ArrayList<Member>();
-		members.add(new Member("Bram", "Robyns", "bramrobyns@hotmail.com"));
-		members.add(new Member("Allen", "Scott", "allenScott@hotmail.com"));
 	}
 	
 	public static MemberDB getInstance(){

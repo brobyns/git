@@ -3,22 +3,23 @@ package model;
 import java.util.List;
 
 public class Member{
-	private Long id;
+	private int id;
 	private String firstName, lastName;
 	private String email;
 	private List<Group> groups;
 	private List<Expense> expenses;
 
-	public Member(String firstName, String lastName, String email){
+	public Member(int id, String firstName, String lastName, String email){
+		setId(id);
 		setFirstName(firstName);
 		setLastName(lastName);
 		setEmail(email);
 	}
 
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(Long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	public String getFirstName() {

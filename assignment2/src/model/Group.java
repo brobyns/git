@@ -4,14 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Group {
+	private int id;
 	private Admin admin;
 	private String name;
 	private List<Member> members;
 	
-	public Group(Admin admin, String name){
+	public Group(int id, String name){
 		members = new ArrayList<Member>();
-		setAdmin(admin);
+		//setAdmin(admin);
+		setId(id);
 		setName(name);
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	public Admin getAdmin() {

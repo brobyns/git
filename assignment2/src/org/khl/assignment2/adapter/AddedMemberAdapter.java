@@ -1,12 +1,8 @@
 package org.khl.assignment2.adapter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.khl.assignment2.R;
-import org.khl.assignment2.R.id;
-import org.khl.assignment2.R.layout;
 
 import model.Member;
 
@@ -15,21 +11,28 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 public class AddedMemberAdapter extends BaseAdapter {
 
 	private Activity activity;
-	private List<Member> data;
+	private List<Member> data, members;
+	private ArrayAdapter<Member> memberAdapt;
+	private Spinner spinner;
 	private static LayoutInflater inflater=null;
 //	public ImageLoader imageLoader; 
 
-	public AddedMemberAdapter(Activity a, List<Member> membersInvited) {
+	public AddedMemberAdapter(Activity a, List<Member> membersInvited, ArrayAdapter<Member> memberAdapt, 
+			List<Member> members, Spinner spinner) {
 		activity = a;
 		data=membersInvited;
+		this.members = members;
+		this.memberAdapt = memberAdapt;
+		this.spinner = spinner;
 		inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 //		imageLoader=new ImageLoader(activity.getApplicationContext());
 	}
@@ -55,7 +58,7 @@ public class AddedMemberAdapter extends BaseAdapter {
 		TextView memberName = (TextView)view.findViewById(R.id.memberName); // member
 		initializeDeleteBtn(position, view);
 		Member member = data.get(position);
-		memberName.setText(member.getFirstName());
+		memberName.setText(member.toString());
 		return view;
 	}
 	
@@ -65,10 +68,13 @@ public class AddedMemberAdapter extends BaseAdapter {
 		deleteBtn.setOnClickListener(new View.OnClickListener() {
 	        @Override
 	        public void onClick(View v) {
-	            Integer index = (Integer) v.getTag();
-	            //items.remove(index.intValue());  
+	            Integer index = (Integer) v.getTag(); 
+	            Member m = data.get(index.intValue());
 	            data.remove(index.intValue());
+	            members.add(m);
 	            notifyDataSetChanged();
+	            memberAdapt.notifyDataSetChanged();
+	            spinner.setAdapter(memberAdapt);
 	        }
 	    });
 	}

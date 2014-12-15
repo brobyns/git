@@ -14,16 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/GroupsTitle"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="#ea974e"
-            android:gravity="center"
-            android:text="@string/groups_title"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp" />
     </LinearLayout>
 
     <Button
@@ -46,7 +36,7 @@
         <ListView
             android:id="@android:id/list"
             android:layout_width="fill_parent"
-            android:layout_height="239dp"
+            android:layout_height="310dp"
             android:divider="#b5b5b5"
             android:dividerHeight="1dp"
             android:listSelector="@drawable/list_selector" >
@@ -92,7 +82,6 @@
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/linearLayout1"
         android:layout_alignLeft="@+id/groupsLayout"
         android:layout_below="@+id/groupsLayout"
         android:orientation="vertical" >
