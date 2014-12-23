@@ -1,130 +1,125 @@
 package service;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Map;
+
+import model.Group;
+import model.Member;
+import model.Facade.Facade;
+import model.Facade.FacadeImpl;
+import model.observer.Observer;
+import model.observer.Subject;
+
+import org.khl.assignment2.MainActivity;
 import org.xmlpull.v1.XmlPullParserException;
+
+import db.GroupDB;
+import db.MemberDB;
+import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.XmlResourceParser;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.util.Log;
 
-public class FetchData extends AsyncTask<Void, Void, Void>{
+public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 
 	private ConnectivityManager connectivityManager;
 	private NetworkInfo netwerkInfo;
-
+	private static final String FILENAME= "db.xml";
 	private Context context;
-
 	private boolean isConnected = false;
-
 	public static final String GAME = "game";
+	private MemberDB memberDB = MemberDB.getInstance();
+	private GroupDB groupDB = GroupDB.getInstance();
+	private Facade facade;
+	private List<Observer> observers;
 
 	public FetchData(Context context) {
 		this.context = context;
+		observers = new ArrayList<Observer>();
 	}
 
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-		checkIfConnected();
+		String dbWriterType = (checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
+		facade = new FacadeImpl(dbWriterType);
 	}
 
 	@Override
 	protected Void doInBackground(Void...params) {
-	/*	List<Word> words = new ArrayList<Word>();
+		Map<Integer, Member> members = new HashMap<Integer, Member>();
+		Map<Integer, Group> groups = new HashMap<Integer, Group>();
 
 		if(!isConnected) {		//OFFLINE
 
-			Resources resources = context.getResources();
-
-			XmlResourceParser parser = resources.getXml(R.xml.words);
-
+			XMLParser xmlParser = new XMLParser();
+			FileInputStream fin = null;
 			try {
-				int counter = 1, points = 0;
-				String text = null, category = null;
-
-				while (parser.getEventType() != XmlResourceParser.END_DOCUMENT) {
-					if(parser.getEventType() == XmlResourceParser.TEXT){
-						if(counter == 1) {	
-							text = parser.getText();
-						} else if (counter == 2) {
-							category = parser.getText();
-						} else if (counter == 3) {
-							points = Integer.parseInt(parser.getText());
-						}
-						counter++;
-
-						if(counter == 4) {
-							counter = 1;
-							words.add(new Word(text, category, points));
-						}
-					}
-					parser.next();
-				}
-				game.setWords(words);
+				fin = context.openFileInput(FILENAME);
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			}
+			try {
+				members = xmlParser.parse(fin).get("members");
+				memberDB.setMembers(members);
+				groups = xmlParser.parse(fin).get("groups");
+				groupDB.setGroups(groups);
 			} catch (XmlPullParserException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
-			parser.close();
 
 		} else {		  //ONLINE
-
-			JsonParser parser = new JsonParser();
-			String json = parser.getJSONFromUrl("https://u0047590.webontwerp.khleuven.be/php/fetchGuessWords.php");
-
-			if (json != null) {
-				try {
-					JSONArray array = new JSONArray(json);
-
-					for(int i = 0; i < array.length(); i++) {
-						JSONObject object = new JSONObject(array.getString(i));
-						Word word = new Word(object.getString("guessword").toUpperCase(), object.getString("type").substring(0,1).toUpperCase() + object.getString("type").substring(1), object.getString("guessword").length() * 10);
-						words.add(word);
-					}
-
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
+			members = facade.getMembersOnline();
+			memberDB.setMembers(members);
+			groups = facade.getGroupsOnline();
+			groupDB.setGroups(groups);
 		}
-		try {
-			game.setWords(words);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-*/		return null;
+		return null;
 	}
 
 	@Override
 	protected void onPostExecute(Void result) {
 		super.onPostExecute(result);
-
+		notifyObservers();
 		connectivityManager = null;
 		netwerkInfo = null;
+		
 	}
-	
-	public void checkIfConnected(){
+
+	public boolean checkIfConnected(){
 		connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		netwerkInfo = connectivityManager.getActiveNetworkInfo();	
 
 		if(netwerkInfo != null && netwerkInfo.isConnected()) {
 			isConnected = true;
 		}
+		return isConnected;
 	}
-	
+
 	public boolean isConnected(){
 		return isConnected;
 	}
-	
-	
+
+	@Override
+	public void notifyObservers() {
+		for(Observer o : observers){
+			o.update();
+		}
+	}
+
+	@Override
+	public void addObserver(Observer o) {
+		observers.add(o);
+	}
+
+
 }

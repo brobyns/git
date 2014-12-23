@@ -1,6 +1,9 @@
 package db;
 
 import java.util.List;
+import java.util.Map;
+
+import android.util.Log;
 
 import model.Expense;
 import model.Group;
@@ -34,7 +37,7 @@ public class DBFacadeImpl implements DBFacade {
 	}
 
 	@Override
-	public List<Member> getMembers() {
+	public Map<Integer, Member> getMembers() {
 		return writer.getMembers();
 	}
 	
@@ -50,17 +53,22 @@ public class DBFacadeImpl implements DBFacade {
 	@Override
 	public void writeGroup(String groupname, List<Member> members){
 		writer.writeGroup(groupname, members);
-		closeConnection();
+	}
+	
+
+	@Override
+	public void updateGroup(int groupId, String groupName, List<Member> membersInvited) {
+		writer.updateGroup(groupId, groupName, membersInvited);
 	}
 
 	@Override
-	public List<Group> getGroups() {
+	public Map<Integer, Group> getGroups() {
 		return writer.getGroups();
 	}
 	
 	public void writeExpense(List<Member> recipients, double amount, String date,
-			String description){
-		writer.writeExpense(recipients, amount, date, description);
+			String description, int groupid){
+		writer.writeExpense(recipients, amount, date, description, groupid);
 	}
 
 	@Override

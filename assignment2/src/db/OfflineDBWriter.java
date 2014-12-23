@@ -9,18 +9,22 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import model.Expense;
 import model.Group;
 import model.Member;
+import model.observer.Observer;
 
 import android.content.Context;
+import android.util.Log;
 
 public class OfflineDBWriter implements DBWriter {
 
 	private Context context;
-	private ArrayList<Member> members;
+	private Map<Integer, Member> members;
 
 	private ObjectOutputStream outputStream;
 	private ObjectInputStream inputStream;
@@ -29,9 +33,8 @@ public class OfflineDBWriter implements DBWriter {
 
 	private static final String HIGHSCORE_FILE = "scores.txt";
 
-	public OfflineDBWriter(Context context) {
-		this.context = context;
-		members = new ArrayList<Member>();
+	public OfflineDBWriter() {
+		members = new HashMap<Integer, Member>();
 	}
 
 /*	private void sort() {
@@ -124,11 +127,11 @@ public class OfflineDBWriter implements DBWriter {
 		this.context = context;
 	}
 
-	public void setMembers(ArrayList<Member> members) {
+	public void setMembers(Map<Integer, Member> members) {
 		this.members = members;
 	}
 
-	public List<Member> getMembers() {
+	public Map<Integer, Member> getMembers() {
 		loadScoreFile();
 //		sort();
 		return members;
@@ -142,11 +145,10 @@ public class OfflineDBWriter implements DBWriter {
 	@Override
 	public void writeGroup(String groupname, List<Member> members) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
-	public List<Group> getGroups() {
+	public Map<Integer, Group> getGroups() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -164,7 +166,7 @@ public class OfflineDBWriter implements DBWriter {
 
 	@Override
 	public void writeExpense(List<Member> recipients, double amount,
-			String date, String description) {
+			String date, String description, int groupid) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -179,5 +181,23 @@ public class OfflineDBWriter implements DBWriter {
 	public List<Expense> getExpensesPaidToMember(int memberid) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void updateGroup(int groupid, String groupName, List<Member> membersInvited) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void notifyObservers() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addObserver(Observer o) {
+		// TODO Auto-generated method stub
+		
 	}
 }

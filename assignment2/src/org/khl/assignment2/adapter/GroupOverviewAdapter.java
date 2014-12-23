@@ -1,11 +1,9 @@
 package org.khl.assignment2.adapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import model.Group;
 import model.Member;
-import model.Facade.Facade;
 
 import org.khl.assignment2.R;
 
@@ -22,13 +20,11 @@ public class GroupOverviewAdapter extends BaseAdapter {
 	private Activity activity;
 	private static LayoutInflater inflater=null;
 	private List<Group> groups;
-	private Facade facade;
 	//		public ImageLoader imageLoader; 
 
-	public GroupOverviewAdapter(Activity a, List<Group> groups, Facade facade) {
+	public GroupOverviewAdapter(Activity a, List<Group> groups) {
 		activity = a;
 		this.groups=groups;
-		this.facade = facade;
 		inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		//			imageLoader=new ImageLoader(activity.getApplicationContext());
 	}
@@ -57,7 +53,7 @@ public class GroupOverviewAdapter extends BaseAdapter {
 
 
 		groupName.setText(groups.get(position).getName());
-		List<Member> membersInGroup = facade.getMembersInGroup(groups.get(position).getId());
+		List<Member> membersInGroup = groups.get(position).getMembers();
 		if(!membersInGroup.isEmpty()){
 			String names="";
 			for(int i = 0; i < membersInGroup.size(); i++){

@@ -13,7 +13,6 @@ import model.Facade.Facade;
 import model.Facade.FacadeImpl;
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -24,7 +23,8 @@ import android.widget.Spinner;
 
 public class AddExpenseActivity extends Activity implements OnItemSelectedListener {
 	private Facade facade;
-	private EditText expenseType, description, amount;
+	private int groupid;
+	private EditText description, amount;
 	private FetchData fetchData;
 	private Spinner spinner;
 	private ArrayAdapter<Member> memberAdapt;
@@ -38,21 +38,22 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_expense);
-		fetchNewData();
-		String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
+		Bundle b = getIntent().getExtras();
+        groupid = b.getInt(GroupDetailActivity.GROUP_ID);
+		//fetchNewData();
+		fetchData = new FetchData(this.getApplicationContext());
+		String dbWriterType = (fetchData.checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
-		members = facade.getAllMembers();
+		members = new ArrayList<Member>(facade.getMembers().values());
 		initializeComponents();
 	}
 	
 
 	private void fetchNewData(){
-		fetchData = new FetchData(this.getApplicationContext());
 		fetchData.execute();
 	}
 
 	private void initializeComponents(){
-		expenseType = (EditText)findViewById(R.id.type);
 		description = (EditText)findViewById(R.id.description);
 		amount = (EditText)findViewById(R.id.amount);
 		spinner = (Spinner) findViewById(R.id.spinner);
@@ -66,7 +67,7 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 	}
 
 	public void addExpense(View v){
-		facade.writeExpense(recipients, Double.parseDouble(amount.getText().toString()), getCurrentDateTime(), description.getText().toString());
+		facade.writeExpense(recipients, Double.parseDouble(amount.getText().toString()), getCurrentDateTime(), description.getText().toString(), groupid);
 		finish();
 	}
 	

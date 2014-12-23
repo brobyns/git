@@ -35,6 +35,14 @@
             android:label="@string/group_detail_title" >
         </activity>
         <activity
+            android:name="org.khl.assignment2.MemberDetailActivity"
+            android:label="@string/member_detail_title" >
+        </activity>
+        <activity
+            android:name="org.khl.assignment2.ExpenseDetailActivity"
+            android:label="@string/expense_detail_title" >
+        </activity>
+        <activity
             android:name="org.khl.assignment2.AddExpenseActivity"
             android:label="@string/add_expense_title"
             android:windowSoftInputMode="adjustPan" >

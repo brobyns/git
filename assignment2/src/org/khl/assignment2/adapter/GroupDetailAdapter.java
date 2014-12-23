@@ -37,11 +37,11 @@ public class GroupDetailAdapter extends BaseAdapter {
 	}
 
 	public Object getItem(int position) {
-		return position;
+		return members.get(position);
 	}
 
 	public long getItemId(int position) {
-		return position;
+		return members.get(position).getId();
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {

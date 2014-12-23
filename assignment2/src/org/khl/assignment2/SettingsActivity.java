@@ -1,6 +1,5 @@
 package org.khl.assignment2;
 
-import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
 
@@ -23,8 +22,9 @@ public class SettingsActivity extends Activity implements OnItemSelectedListener
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
-		fetchNewData();
-		String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
+		//fetchNewData();
+		fetchData = new FetchData(this.getApplicationContext());
+		String dbWriterType = (fetchData.checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
 		initializeComponents();
 	}
@@ -54,6 +54,10 @@ public class SettingsActivity extends Activity implements OnItemSelectedListener
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void cancel(View v){
+		finish();
 	}
 
 }

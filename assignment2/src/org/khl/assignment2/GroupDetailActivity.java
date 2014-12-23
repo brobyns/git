@@ -1,8 +1,8 @@
 package org.khl.assignment2;
 
-import java.util.List;
-
 import org.khl.assignment2.adapter.GroupDetailAdapter;
+
+import db.DBWriter;
 
 import service.FetchData;
 
@@ -10,9 +10,11 @@ import model.Group;
 import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
+import model.observer.Observer;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,14 +23,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class GroupDetailActivity extends ListActivity implements OnItemClickListener{
+public class GroupDetailActivity extends ListActivity implements OnItemClickListener, Observer{
 	private TextView memberName;
 	private Facade facade;
 	private ListView listView;
 	private GroupDetailAdapter detailAdapt;
 	private FetchData fetchData;
 	private int groupid;
-	private Group group;
+	private DBWriter dbWriter;
+	public static final String GROUP_ID = "groupId", MEMBER_ID="memberId";
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,9 +39,12 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
         setContentView(R.layout.activity_group_detail);
         Bundle b = getIntent().getExtras();
         groupid = b.getInt(MainActivity.GROUP_ID);
-        fetchNewData();
-        String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
+        //fetchNewData();
+        fetchData = new FetchData(this.getApplicationContext());
+        String dbWriterType = (fetchData.checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
+		dbWriter = facade.getDBWriter();
+		dbWriter.addObserver(this);
         initializeComponents();
 		
     }
@@ -51,8 +57,9 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
 	private void initializeComponents(){
 		memberName = (TextView)findViewById(R.id.memberName);
 		listView = (ListView)findViewById(android.R.id.list);
-		detailAdapt=new GroupDetailAdapter(this, facade.getMembersInGroup(groupid), facade);
+		detailAdapt=new GroupDetailAdapter(this, facade.getGroups().get(groupid).getMembers(), facade);
 		listView.setAdapter(detailAdapt);
+		listView.setOnItemClickListener(this);
 	}
 	
 	public void settlePayments(View v){
@@ -60,11 +67,14 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
 	}
 	
 	public void manageGroup(View v){
-		
+		Intent intent = new Intent(GroupDetailActivity.this, CreateGroupActivity.class);
+		intent.putExtra(GROUP_ID, groupid);
+		startActivity(intent);
 	}
 	
 	public void addExpense(View v){
 		Intent intent = new Intent(GroupDetailActivity.this, AddExpenseActivity.class);
+		intent.putExtra(GROUP_ID, groupid);
 		startActivity(intent);
 	}
 	
@@ -96,11 +106,21 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
 		} 
 		return super.onOptionsItemSelected(item);
 	}
+	
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+		Log.v("bram", "memberDetail "+ pos);
+		Member member = (Member) parent.getItemAtPosition(pos);
+		Intent intent = new Intent(GroupDetailActivity.this, MemberDetailActivity.class);
+		intent.putExtra(MEMBER_ID, member.getId());
+		startActivity(intent);
+	}
 
 	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		// TODO Auto-generated method stub
-		
+	public void update() {
+		detailAdapt=new GroupDetailAdapter(this, facade.getGroups().get(groupid).getMembers(), facade);
+		detailAdapt.notifyDataSetChanged();
+		listView.setAdapter(detailAdapt);
 	}
 	
 	

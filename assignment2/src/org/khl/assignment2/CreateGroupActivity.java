@@ -7,15 +7,18 @@ import org.khl.assignment2.adapter.AddedMemberAdapter;
 
 import service.FetchData;
 
+import model.Group;
 import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -28,6 +31,8 @@ import android.widget.Spinner;
 public class CreateGroupActivity extends ListActivity implements OnItemSelectedListener{
 	private LinearLayout groupsLayout;
 	private Facade facade;
+	private Group group;
+	private String groupName;
 	private EditText groupNameField, emailField;
 	private Button createBtn, cancelBtn;
 	private Spinner spinner;
@@ -42,16 +47,30 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_group);
-		fetchNewData();
-		String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
-		facade = new FacadeImpl(dbWriterType);
-		members = facade.getAllMembers();
-		initializeComponents();
-		
-	}
-	
-	private void fetchNewData(){
 		fetchData = new FetchData(this.getApplicationContext());
+		String dbWriterType = (fetchData.checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
+		facade = new FacadeImpl(dbWriterType);
+		members = new ArrayList<Member>(facade.getMembers().values());
+		Bundle b = getIntent().getExtras();
+		if(b != null){
+			loadIntentData(b);
+		}
+		//fetchNewData();
+		initializeComponents();
+	}
+
+	private void loadIntentData(Bundle b){
+		int groupid = b.getInt(GroupDetailActivity.GROUP_ID);
+		group = facade.getGroupForId(groupid);
+		membersInvited = group.getMembers();
+		for(Member m : membersInvited){
+			members.remove(m);
+		}
+		groupName = group.getName();
+		setTitle("Manage group");
+	}
+
+	private void fetchNewData(){
 		fetchData.execute();
 	}
 
@@ -60,6 +79,15 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 		cancelBtn = (Button)findViewById(R.id.cancelBtn);
 		groupsLayout = (LinearLayout)findViewById(R.id.groupsLayout);
 		groupNameField = (EditText)findViewById(R.id.groupName);
+		if(groupName != null){
+			groupNameField.setText(groupName);
+			createBtn.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View arg0) {
+					updateGroup();
+				}
+			});
+		}
 		emailField = (EditText)findViewById(R.id.email);
 		spinner = (Spinner) findViewById(R.id.spinner);
 		memberAdapt = new ArrayAdapter<Member>(this,  android.R.layout.simple_spinner_item, members);
@@ -88,6 +116,12 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 		facade.createGroup(groupName, membersInvited);
 		finish();
 	}
+	
+	public void updateGroup(){
+		Log.v("bram", membersInvited.size()+"");
+		facade.updateGroup(group.getId(), groupNameField.getText().toString(), membersInvited);
+		finish();
+	}
 
 	public void invite(View v){
 		if(selectedMember != null){
@@ -97,6 +131,7 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 				selectedMember = null;
 			}
 			refreshData();
+			Log.v("bram", "invite:" + membersInvited.size()+"");
 		}
 		String email = emailField.getText().toString();
 		if(isValidEmail(email)){

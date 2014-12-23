@@ -1,14 +1,16 @@
 package model;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Expense {
-	private int id, senderId;
+	private int id, senderId, groupId;
 	private double amount;
 	private String type, description;
 	private String date;
-	private List<Member> membersPaidFor;
-	
+	private Set<Integer> membersPaidFor;
+
 	public Expense(int id, int senderId, double amount, String date, String description){
 		setId(id);
 		setSenderId(senderId);
@@ -16,7 +18,13 @@ public class Expense {
 		setDate(date);
 		setDescription(description);
 	}
-	
+
+	public Expense(int id, int senderId, double amount, String date, String description, Set<Integer> membersPaidFor, int groupId){
+		this(id, senderId, amount, date, description);
+		setGroupId(groupId);
+		setMembersPaidFor(membersPaidFor);
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -57,11 +65,19 @@ public class Expense {
 	public void setDate(String date) {
 		this.date = date;
 	}
-	public List<Member> getMembersPaidFor() {
+	public Set<Integer> getMembersPaidFor() {
 		return membersPaidFor;
 	}
-	public void setMembersPaidFor(List<Member> membersPaidFor) {
+	public void setMembersPaidFor(Set<Integer> membersPaidFor) {
 		this.membersPaidFor = membersPaidFor;
 	}
-	
+
+	public int getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(int groupId) {
+		this.groupId = groupId;
+	}
+
 }

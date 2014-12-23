@@ -10,6 +10,8 @@
     <string name="groups_title">Groups</string>
     <string name="group_detail_title">Group Detail</string>
     <string name="create_group_title">Create Group</string>
+    <string name="member_detail_title">Member detail</string> 
+    <string name="expense_detail_title">Expense detail</string>
     <string name="add_expense_title">Add Expense</string>
     <string name="settings_title">Settings</string>
     <string name="cancel">Cancel</string>
@@ -27,7 +29,12 @@
 	<string name="total_balance">Total Balance: </string>
 	<string name="add_recipient">Add recipient</string>
 	<string name="select_currency">Select currency</string>
+	<string name="member">Member: </string>
 	<string name="members">Members: </string>
+	<string name="joined_on">Joined on: </string>
+	<string name="description">Description: </string>
+	<string name="amount">Amount: </string>
+	<string name="date">Date: </string>
 	<string name="settle_payments">Settle Payments</string>
 	<string name="manage_group">Manage Group</string>
 	<string name="add">Add</string>

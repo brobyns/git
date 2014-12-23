@@ -1,6 +1,5 @@
 package model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Group {
@@ -9,11 +8,16 @@ public class Group {
 	private String name;
 	private List<Member> members;
 	
+	public Group(){}
+	
 	public Group(int id, String name){
-		members = new ArrayList<Member>();
-		//setAdmin(admin);
 		setId(id);
 		setName(name);
+	}
+
+	public Group(int id, String groupname, List<Member> members) {
+		this(id, groupname);
+		setMembers(members);
 	}
 
 	public void setId(int id) {
@@ -47,14 +51,5 @@ public class Group {
 	public void setMembers(List<Member> members) {
 		this.members = members;
 	}
-	
-	public void deleteMember(long memberId){
-		for(Member m : members){
-			if(m.getId() == memberId){
-				members.remove(m);
-			}
-		}
-	}
-	
 	
 }

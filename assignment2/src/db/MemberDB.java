@@ -1,17 +1,17 @@
 package db;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import model.Member;
 
 public class MemberDB {
 	private Member CurrMember;
-	private List<Member> members;
+	private Map<Integer, Member> members;
 	private volatile static MemberDB instance;
 	
 	private MemberDB(){
-		members = new ArrayList<Member>();
+		members = new HashMap<Integer, Member>();
 	}
 	
 	public static MemberDB getInstance(){
@@ -29,7 +29,7 @@ public class MemberDB {
 		if(member == null){
 			return false;
 		}else{
-			members.add(member);
+			members.put(member.getId(), member);
 			return true;
 		}
 	}
@@ -38,7 +38,7 @@ public class MemberDB {
 		if(member == null){
 			return false;
 		}else{
-			members.remove(member);
+			members.remove(member.getId());
 			return true;
 		}
 	}
@@ -51,11 +51,11 @@ public class MemberDB {
 		CurrMember = currMember;
 	}
 	
-	public List<Member> getAllMembers() {
+	public Map<Integer, Member> getMembers() {
 		return members;
 	}
 	
-	public void setMembers(List<Member> members) {
+	public void setMembers(Map<Integer, Member> members) {
 		this.members = members;
 	}	
 	

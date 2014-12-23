@@ -1,22 +1,30 @@
 package org.khl.assignment2;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import org.khl.assignment2.adapter.GroupOverviewAdapter;
 
+import db.DBWriter;
+
 import service.AssetsPropertyReader;
 import service.FetchData;
+import service.StoreData;
+import service.XMLWriter;
 
 import model.Group;
 import model.Member;
 import model.Settings;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
+import model.observer.Observer;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 
-public class MainActivity extends ListActivity implements OnItemClickListener{
+public class MainActivity extends ListActivity implements OnItemClickListener, Observer{
 
 	private Facade facade;
 	private LinearLayout groupsLayout;
@@ -37,6 +45,7 @@ public class MainActivity extends ListActivity implements OnItemClickListener{
 	private String groupSelected;
 	private GroupOverviewAdapter overviewAdapt;
 	private FetchData fetchData;
+	private DBWriter dbWriter;
 	public static final String GROUP_ID = "groupid";
 
 	@Override
@@ -47,6 +56,8 @@ public class MainActivity extends ListActivity implements OnItemClickListener{
 		fetchNewData();
 		String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
+		dbWriter = facade.getDBWriter();
+		dbWriter.addObserver(this);
 		initializeComponents();
 	}
 	
@@ -63,9 +74,10 @@ public class MainActivity extends ListActivity implements OnItemClickListener{
 	    settings.setCurrency(p.getProperty(p.getProperty("currency")));
 	}
 
-
 	private void fetchNewData(){
 		fetchData = new FetchData(this.getApplicationContext());
+		fetchData.addObserver(this);
+		
 		fetchData.execute();
 	}
 
@@ -73,7 +85,10 @@ public class MainActivity extends ListActivity implements OnItemClickListener{
 		groupsLayout = (LinearLayout)findViewById(R.id.groupsLayout);
 		createBtn = (Button)findViewById(R.id.createBtn);
 		listView = (ListView)findViewById(android.R.id.list);
-		overviewAdapt=new GroupOverviewAdapter(this, facade.getAllGroups(), facade);
+	}
+	
+	public void setAdapter(){
+		overviewAdapt=new GroupOverviewAdapter(this, new ArrayList<Group>(facade.getGroups().values()));
 		listView.setAdapter(overviewAdapt);
 		listView.setOnItemClickListener(this);
 	}
@@ -113,6 +128,8 @@ public class MainActivity extends ListActivity implements OnItemClickListener{
 	}
 
 	public void finish(){
+		StoreData storeData = new StoreData(this.getApplicationContext(), facade, null, groups);
+		storeData.execute();
 		super.finish();
 	}
 
@@ -122,5 +139,10 @@ public class MainActivity extends ListActivity implements OnItemClickListener{
 		Intent intent = new Intent(MainActivity.this, GroupDetailActivity.class);
 		intent.putExtra(GROUP_ID, group.getId());
 		startActivity(intent);
+	}
+
+	@Override
+	public void update() {
+		setAdapter();
 	}
 }

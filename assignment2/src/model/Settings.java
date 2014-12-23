@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import db.MemberDB;
 
 public class Settings {
-	public static Member currentMember;
+	public Member currentMember;
 	private String currency;
 	private volatile static Settings instance;
 	
