@@ -8,6 +8,7 @@ import org.xmlpull.v1.XmlSerializer;
 import model.Expense;
 import model.Group;
 import model.Member;
+import android.util.Log;
 import android.util.Xml;
 
 public class XMLWriter {
@@ -95,5 +96,31 @@ public class XMLWriter {
 				xmlSerializer.text(expense.getGroupId()+"");
 			xmlSerializer.endTag("", "groupid");
 		xmlSerializer.endTag("", "expense");
+	}
+	
+	public String writeSettings(Member member, String currency) throws IllegalArgumentException, IllegalStateException, IOException {
+		XmlSerializer xmlSerializer = Xml.newSerializer();
+		StringWriter writer = new StringWriter();
+		xmlSerializer.setOutput(writer);
+		xmlSerializer.startDocument("UTF-8", true);
+		xmlSerializer.startTag("", "settings");
+			xmlSerializer.startTag("", "member");
+				xmlSerializer.startTag("", "firstname");
+					xmlSerializer.text(member.getFirstName());
+				xmlSerializer.endTag("", "firstname");
+				xmlSerializer.startTag("", "lastname");
+					xmlSerializer.text(member.getLastName());
+				xmlSerializer.endTag("", "lastname");
+				xmlSerializer.startTag("", "email");
+					xmlSerializer.text(member.getEmail());
+				xmlSerializer.endTag("", "email");
+			xmlSerializer.endTag("", "member");
+			xmlSerializer.startTag("", "currency");
+				xmlSerializer.text(currency);
+			xmlSerializer.endTag("", "currency");
+		xmlSerializer.endTag("", "settings");
+		xmlSerializer.endDocument();
+		return writer.toString();
+
 	}
 }

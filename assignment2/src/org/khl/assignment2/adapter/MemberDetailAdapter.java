@@ -7,6 +7,7 @@ import org.khl.assignment2.R;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,17 +20,19 @@ public class MemberDetailAdapter extends BaseAdapter {
 
 	private Activity activity;
 	private List<Expense> expenses;
-	private static LayoutInflater inflater=null;
+	private static LayoutInflater inflater = null;
 	private Facade facade;
 	private int memberid;
 
-	public MemberDetailAdapter(Activity a, List<Expense> expenses,Facade facade, int memberid){
+	public MemberDetailAdapter(Activity a, List<Expense> expenses,
+			Facade facade, int memberid) {
 		activity = a;
 		this.memberid = memberid;
 		this.facade = facade;
 		this.expenses = expenses;
-		inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		//			imageLoader=new ImageLoader(activity.getApplicationContext());
+		inflater = (LayoutInflater) activity
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		// imageLoader=new ImageLoader(activity.getApplicationContext());
 	}
 
 	@Override
@@ -49,30 +52,37 @@ public class MemberDetailAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		Log.v("test", "pos" + position);
 		View view = convertView;
-		if (convertView == null){
+		
+		
+		if(convertView==null){
 			view = inflater.inflate(R.layout.group_detail_row, null);
 		}
-		TextView paid = (TextView)view.findViewById(R.id.memberName);
-		TextView amountText = (TextView)view.findViewById(R.id.amount);
+		TextView memberName = (TextView)view.findViewById(R.id.memberName); // member
+		TextView amountText = (TextView)view.findViewById(R.id.amount); // who owes who how much
 
-		double amount = facade.getAmount(memberid);
-
-		//set values in listview
-		String amounts = null;
-		if (amount < 0){
-			amounts = "You owe" + amount;
-			paid.setTextColor(Color.RED);
-			amountText.setTextColor(Color.RED);
-		}else if(amount > 0){
-			amounts = "Owes you" + amount;
-			paid.setTextColor(Color.GREEN);
-			amountText.setTextColor(Color.GREEN);
-		}else{
-			amounts = "settled";
-		}
-		amountText.setText(amounts);
+		// Setting all values in listview
+			Expense m = expenses.get(position);
+			//memberName.setText(m.toString());
+			double amount = m.getAmount();
+			String amountString ="";
+			if(amount > 0){
+				amountString = " "+ amount;
+				memberName.setText("You paid");
+				amountText.setTextColor(Color.GREEN);
+			}else if(amount < 0){
+				amount *= -1;
+				amountString = " " + amount;
+				amountText.setTextColor(Color.RED);
+				memberName.setText("Owes you");
+			}else{
+				amountString = "settled";
+			}
+			amountText.setText(amountString);
+		//song.get(CustomizedListView.KEY_ARTIST));
+		//members.setText(song.get(CustomizedListView.KEY_DURATION));
+		//imageLoader.DisplayImage(song.get(CustomizedListView.KEY_THUMB_URL), thumb_image);
 		return view;
 	}
-
 }

@@ -3,12 +3,17 @@ package model;
 import java.util.List;
 
 public class Group {
-	private int id;
+	private static int id = 0;
 	private Admin admin;
 	private String name;
 	private List<Member> members;
 	
-	public Group(){}
+	public Group(String groupname, List<Member> members){
+		id++;
+		setId(id);
+		setName(groupname);
+		setMembers(members);
+	}
 	
 	public Group(int id, String name){
 		setId(id);

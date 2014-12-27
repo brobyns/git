@@ -3,8 +3,6 @@ package db;
 import java.util.List;
 import java.util.Map;
 
-import android.util.Log;
-
 import model.Expense;
 import model.Group;
 import model.Member;
@@ -15,11 +13,6 @@ public class DBFacadeImpl implements DBFacade {
 	
 	public DBFacadeImpl (DBWriter writer) {
 		this.writer = writer;
-	}
-
-	@Override
-	public void writeMember(String firstname, String lastname, String email) throws Exception {
-		writer.writeMember(firstname, lastname, email);
 	}
 	
 	public DBWriter getWriter() {
@@ -40,19 +33,10 @@ public class DBFacadeImpl implements DBFacade {
 	public Map<Integer, Member> getMembers() {
 		return writer.getMembers();
 	}
-	
-	@Override
-	public List<Member> getMembersInGroup(int groupid) {
-		return writer.getMembersInGroup(groupid);
-	}
-	
-	public Group getGroupForId(int id){
-		return writer.getGroupForId(id);
-	}
 
 	@Override
-	public void writeGroup(String groupname, List<Member> members){
-		writer.writeGroup(groupname, members);
+	public void writeGroup(Group group){
+		writer.writeGroup(group);
 	}
 	
 
@@ -66,18 +50,30 @@ public class DBFacadeImpl implements DBFacade {
 		return writer.getGroups();
 	}
 	
-	public void writeExpense(List<Member> recipients, double amount, String date,
-			String description, int groupid){
-		writer.writeExpense(recipients, amount, date, description, groupid);
+
+	public void writeExpense(Expense expense, List<Member> recipients){
+		writer.writeExpense(expense, recipients);
 	}
 
 	@Override
-	public List<Expense> getExpensesPaidByMember(int memberid) {
-		return writer.getExpensesPaidByMember(memberid);
+	public void clearDatabase() {
+		writer.clearDatabase();
+	}
+
+	public void writeMembers(List<Member> members){
+		writer.writeMembers(members);
+	}
+
+	public void writeGroups(List<Group> groups){
+		writer.writeGroups(groups);
+	}
+
+	public void writeExpenses(List<Expense> expenses){
+		writer.writeExpenses(expenses);
 	}
 
 	@Override
-	public List<Expense> getExpensesPaidToMember(int memberid) {
-		return writer.getExpensesPaidToMember(memberid);
+	public void writeMember(Member member) {
+		writer.writeMember(member);
 	}
 }

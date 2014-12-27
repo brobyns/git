@@ -1,6 +1,12 @@
 package model.Facade;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import android.content.Context;
+
+import service.StoreData;
+import service.XMLWriter;
 
 import model.Expense;
 import model.Group;
@@ -14,29 +20,26 @@ import db.DBFacade;
 import db.DBFacadeImpl;
 
 public class FacadeImpl implements Facade{
-	private MemberDB memberDB;
-	private GroupDB groupDB;
 	private DBFacade dbFacade;
+	private MemberDB memberDB = MemberDB.getInstance();
+	private GroupDB groupDB = GroupDB.getInstance();
 	private Settings settings = Settings.getInstance();
 	private DBWriter writer;
 
 	public FacadeImpl(String dbWriterType){
 		writer = DBWriterFactory.createDBWriter(dbWriterType);
 		dbFacade = new DBFacadeImpl(writer);
-		memberDB = MemberDB.getInstance();
-		groupDB = GroupDB.getInstance();
 	}
-	
+
 	public DBWriter getDBWriter(){
 		return writer;
 	}
 
 	@Override
-	public void createGroup(String groupName, List<Member> membersInvited) {
-		//Member m = getCurrentMember();
-		dbFacade.writeGroup(groupName, membersInvited);
+	public void createGroup(Group group) {
+		dbFacade.writeGroup(group);
 	}
-	
+
 	@Override
 	public void updateGroup(int groupId, String groupName, List<Member> membersInvited) {
 		dbFacade.updateGroup(groupId, groupName, membersInvited);
@@ -51,7 +54,7 @@ public class FacadeImpl implements Facade{
 	public Map<Integer, Member> getMembers() {
 		return memberDB.getMembers();
 	}
-	
+
 	@Override
 	public Map<Integer,Member> getMembersOnline() {
 		return dbFacade.getMembers();
@@ -60,44 +63,27 @@ public class FacadeImpl implements Facade{
 
 	public List<Member> getMembersInGroup(int groupId){
 		return groupDB.getMembersInGroup(groupId);
-	//	return dbFacade.getMembersInGroup(groupId);
-	}
-
-	public Group getGroupForId(int id){
-		return dbFacade.getGroupForId(id);
 	}
 
 	@Override
 	public void settlePayments() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public Map<Integer,Group> getGroups() {
 		return groupDB.getGroups();
 	}
-	
+
 	@Override
-	public Map<Integer,Group> getGroupsOnline() {
+	public Map<Integer, Group> getGroupsOnline() {
 		return dbFacade.getGroups();
 	}
 
-	public void writeExpense(List<Member> recipients, double amount, String date,
-			String description, int groupid){
-		dbFacade.writeExpense(recipients, amount, date, description, groupid);
+	public void writeExpense(Expense expense, List<Member> recipients){
+		dbFacade.writeExpense(expense, recipients);
 	}
 
-/*	@Override
-	public List<Expense> getExpensesPaidByMember(int memberid) {
-		return dbFacade.getExpensesPaidByMember(memberid);
-	}
-
-	@Override
-	public List<Expense> getExpensesPaidToMember(int memberid) {
-		return dbFacade.getExpensesPaidToMember(memberid);
-	}
-*/	
 	public double getAmountIPaidMember(int memberid){
 		Map<Integer, Member> members = getMembers();
 		double amount = 0;		
@@ -109,7 +95,7 @@ public class FacadeImpl implements Facade{
 		}
 		return amount;
 	}
-	
+
 	public double getAmountMemberPaidMe(int memberid){
 		Map<Integer, Member> members = getMembers();
 		double amount = 0;	
@@ -125,5 +111,39 @@ public class FacadeImpl implements Facade{
 
 	public double getAmount(int memberid){
 		return getAmountIPaidMember(memberid)-getAmountMemberPaidMe(memberid);
+	}
+
+	@Override
+	public void clearDatabase() {
+		dbFacade.clearDatabase();
+	}
+
+	public void writeMembers(List<Member> members){
+		dbFacade.writeMembers(members);
+	}
+
+	public void writeGroups(List<Group> groups){
+		dbFacade.writeGroups(groups);
+	}
+
+	public void writeExpenses(List<Expense> expenses){
+		dbFacade.writeExpenses(expenses);
+	}
+
+	@Override
+	public boolean checkIfNewDataAvailable() {
+		return true;
+	}
+
+	@Override
+	public void createMember(Member member) {
+		dbFacade.writeMember(member);
+	}
+
+	@Override
+	public void writeSettings(Context context, Member member, String currency) {
+		StoreData storeData = new StoreData(context, null, null);
+		storeData.saveSettings(member, currency);
+		createMember(member);
 	}
 }

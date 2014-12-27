@@ -109,7 +109,7 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
 	
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-		Log.v("bram", "memberDetail "+ pos);
+		//Log.v("bram", "memberDetail "+ pos);
 		Member member = (Member) parent.getItemAtPosition(pos);
 		Intent intent = new Intent(GroupDetailActivity.this, MemberDetailActivity.class);
 		intent.putExtra(MEMBER_ID, member.getId());

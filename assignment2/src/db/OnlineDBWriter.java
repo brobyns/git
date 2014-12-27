@@ -17,7 +17,6 @@ import java.util.Set;
 import model.Expense;
 import model.Group;
 import model.Member;
-import model.Settings;
 import model.observer.Observer;
 
 import android.os.StrictMode;
@@ -27,9 +26,6 @@ public class OnlineDBWriter implements DBWriter {
 	private Connection connection;
 	private PreparedStatement statement;
 	private Properties connectionProperties;
-	private Settings settings = Settings.getInstance();
-	private MemberDB memberDB = MemberDB.getInstance();
-	private GroupDB groupDB = GroupDB.getInstance();
 	private ArrayList<Observer> observers;
 	private volatile static DBWriter instance;
 	private static final String JDBC_DRIVER = "org.postgresql.Driver";
@@ -74,18 +70,38 @@ public class OnlineDBWriter implements DBWriter {
 		connectionProperties.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
 	}
 
+	public void writeMembers(List<Member> members){
+		try {
+			statement = connection.prepareStatement("INSERT INTO member (firstname, lastname, email) VALUES(?,?,?)");
+
+			for (int i = 0; i < members.size(); i++) {
+				Member member = members.get(i);
+				statement.setString(1, member.getFirstName());
+				statement.setString(2, member.getLastName());
+				statement.setString(3, member.getEmail());
+				statement.addBatch();
+				if ((i + 1) % 1000 == 0) {
+					statement.executeBatch(); // Execute every 1000 items.
+				}
+			}
+			statement.executeBatch();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
-	public void writeMember(String firstname, String lastname, String email) {
+	public void writeMember(Member member) {
 		ResultSet set = null;
 		try {
-			statement = connection.prepareStatement("SELECT * FROM member WHERE firstname = '" + firstname 
-					+ "' AND lastname ='" + lastname + "'");
+			statement = connection.prepareStatement("SELECT * FROM member WHERE firstname = '" + member.getFirstName()
+					+ "' AND lastname ='" + member.getLastName() + "'");
 			set = statement.executeQuery();
 			if(!set.next()) { 																		//member bestaat nog niet
 				statement = connection.prepareStatement("INSERT INTO member (firstname, lastname, email) VALUES(?,?,?)");
-				statement.setString(1, firstname);
-				statement.setString(2, lastname);
-				statement.setString(3, email);
+				statement.setString(1, member.getFirstName());
+				statement.setString(2, member.getLastName());
+				statement.setString(3, member.getEmail());
 				statement.executeUpdate();
 			}
 		} catch (SQLException e) {
@@ -133,27 +149,6 @@ public class OnlineDBWriter implements DBWriter {
 			e.printStackTrace();
 		}
 		return group;
-	}
-
-	private Member getMemberForName(String firstname, String lastname){
-		Member member = null;
-		try {
-			statement = connection.prepareStatement("SELECT * FROM member WHERE firstname= '" + firstname +"' AND lastname='" + lastname + "'");
-			ResultSet set = statement.executeQuery();
-
-			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				member = new Member(set.getInt(1), set.getString(2), set.getString(3), set.getString(4));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally{
-			try{
-				statement.close();
-			}catch(SQLException e){
-				e.printStackTrace();
-			}
-		}
-		return member;
 	}
 
 	private Group getGroupForName(String name){
@@ -219,14 +214,14 @@ public class OnlineDBWriter implements DBWriter {
 	}
 
 	@Override
-	public void writeExpense(List<Member> recipients, double amount, String date, String description, int groupid) {
+	public void writeExpense(Expense expense, List<Member> recipients){
 		try {
 			statement = connection.prepareStatement("INSERT INTO expense (senderid, amount, expensedate, description, groupid) VALUES(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-			statement.setInt(1, settings.getCurrentMember().getId());
-			statement.setDouble(2, amount);
-			statement.setString(3, date);
-			statement.setString(4, description);
-			statement.setInt(5, groupid);
+			statement.setInt(1, expense.getSenderId());
+			statement.setDouble(2, expense.getAmount());
+			statement.setString(3, expense.getDate());
+			statement.setString(4, expense.getDescription());
+			statement.setInt(5, expense.getGroupId());
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -240,6 +235,17 @@ public class OnlineDBWriter implements DBWriter {
 			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void writeExpenses(List<Expense> expenses){
+		Map<Integer,Member> membersMap = getMembers();
+		ArrayList<Member> members = new ArrayList<Member>();
+		for(Expense e : expenses){
+			for(int memberid : e.getMembersPaidFor()){
+				members.add(membersMap.get(memberid));
+			}
+			writeExpense(e, members);
 		}
 	}
 
@@ -291,8 +297,7 @@ public class OnlineDBWriter implements DBWriter {
 			e.printStackTrace();
 		}
 		try {
-			updateGroupMembers(groupid, members);			
-			groupDB.addGroup(groupid, new Group(groupid, groupname, members));
+			updateGroupMembers(groupid, members);
 			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -322,11 +327,11 @@ public class OnlineDBWriter implements DBWriter {
 	}
 
 	@Override
-	public void writeGroup(String groupname, List<Member> members) {
+	public void writeGroup(Group group) {
 		try {
-			if(getGroupForName(groupname) == null) { 
+			if(getGroupForName(group.getName()) == null) { 
 				statement = connection.prepareStatement("INSERT INTO groups (groupname) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
-				statement.setString(1, groupname);
+				statement.setString(1, group.getName());
 				statement.executeUpdate();
 			}
 		} catch (SQLException e) {
@@ -335,13 +340,18 @@ public class OnlineDBWriter implements DBWriter {
 		ResultSet set;
 		try {
 			set = statement.getGeneratedKeys();
-			if(set.next() && !members.isEmpty()){
-				writeGroupMembers(set.getInt(1), members);			
+			if(set.next() && !group.getMembers().isEmpty()){
+				writeGroupMembers(set.getInt(1), group.getMembers());			
 			}
-			groupDB.addGroup(set.getInt(1), new Group(set.getInt(1), groupname, members));
 			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void writeGroups(List<Group> groups){
+		for(Group g : groups){
+			writeGroup(g);
 		}
 	}
 
@@ -385,50 +395,6 @@ public class OnlineDBWriter implements DBWriter {
 		return expenses;
 	}
 
-	public List<Expense> getExpensesPaidToMember(int memberid){      //betaald door mij aan member
-		List<Expense> expenses = new ArrayList<Expense>();
-		try {
-			statement = connection.prepareStatement("SELECT expense.id, senderid, amount, expensedate, description FROM expense INNER JOIN expense_receiver ON expense.id = expense_receiver.expenseid WHERE senderid ='" + settings.getCurrentMember().getId()+ "' AND receiverid ='" + memberid  +"'");
-			ResultSet set = statement.executeQuery();
-
-			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				expenses.add(new Expense(set.getInt(1), set.getInt(2),set.getDouble(3), set.getString(4), set.getString(5)));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally{
-			try{
-				statement.close();
-			}catch(SQLException e){
-				e.printStackTrace();
-			}
-		}
-		return expenses;
-	}
-
-	public List<Expense> getExpensesPaidByMember(int memberid){     //betaald door member aan mij
-		List<Expense> expenses = new ArrayList<Expense>();
-		try {
-			statement = connection.prepareStatement("SELECT expense.id, senderid, amount, expensedate, description FROM expense INNER JOIN expense_receiver ON expense.id = expense_receiver.expenseid WHERE senderid ='" + memberid+ "' AND receiverid ='" + settings.getCurrentMember().getId()  +"'");
-			ResultSet set = statement.executeQuery();
-
-			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				expenses.add(new Expense(set.getInt(1), set.getInt(2),set.getDouble(3), set.getString(4), set.getString(5)));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally{
-			try{
-				statement.close();
-			}catch(SQLException e){
-				e.printStackTrace();
-			}
-		}
-		return expenses;
-	}
-
-
-
 	@Override
 	public Map<Integer, Group> getGroups() {
 		Map<Integer, Group> groups = new HashMap<Integer, Group>();
@@ -461,6 +427,16 @@ public class OnlineDBWriter implements DBWriter {
 	@Override
 	public void addObserver(Observer o) {
 		observers.add(o);
+	}
+
+	@Override
+	public void clearDatabase() {
+		try {
+			statement = connection.prepareStatement("TRUNCATE group_member, expense_receiver, groups, member, expense");
+			statement.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

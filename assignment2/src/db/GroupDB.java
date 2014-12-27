@@ -34,8 +34,8 @@ public class GroupDB {
 		return groups;
 	}
 	
-	public void addGroup(int groupId, Group group){
-		groups.put(groupId, group);
+	public void addGroup(Group group){
+		groups.put(group.getId(), group);
 	}
 	
 	public List<Member> getMembersInGroup(int groupId){

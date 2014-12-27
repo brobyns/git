@@ -1,5 +1,7 @@
 package org.khl.assignment2;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -11,6 +13,7 @@ import db.DBWriter;
 import service.AssetsPropertyReader;
 import service.FetchData;
 import service.StoreData;
+import service.XMLParser;
 import service.XMLWriter;
 
 import model.Group;
@@ -52,26 +55,12 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		loadSettings();
 		fetchNewData();
 		String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
 		dbWriter = facade.getDBWriter();
 		dbWriter.addObserver(this);
 		initializeComponents();
-	}
-	
-	private void loadSettings(){
-		AssetsPropertyReader assetsPropertyReader;
-	    assetsPropertyReader = new AssetsPropertyReader(this);
-	    Properties p = assetsPropertyReader.getProperties("settings.properties");
-	    p.setProperty("id", "1");
-	    String idString = p.getProperty("id");
-	    int id = Integer.parseInt(idString);
-	    Member currentMember = new Member(id,p.getProperty("firstname"), p.getProperty("lastname"), p.getProperty("email"));
-	    Settings settings = Settings.getInstance();
-	    settings.setCurrentMember(currentMember);
-	    settings.setCurrency(p.getProperty(p.getProperty("currency")));
 	}
 
 	private void fetchNewData(){
@@ -88,14 +77,15 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 	}
 	
 	public void setAdapter(){
-		overviewAdapt=new GroupOverviewAdapter(this, new ArrayList<Group>(facade.getGroups().values()));
+		groups = new ArrayList<Group>(facade.getGroups().values());
+		overviewAdapt=new GroupOverviewAdapter(this, groups);
 		listView.setAdapter(overviewAdapt);
 		listView.setOnItemClickListener(this);
 	}
 
 	public void createGroup(View v){
-			Intent intent = new Intent(MainActivity.this, CreateGroupActivity.class);
-			startActivity(intent);
+		Intent intent = new Intent(MainActivity.this, CreateGroupActivity.class);
+		startActivity(intent);
 	}
 
 	@Override
@@ -128,7 +118,8 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 	}
 
 	public void finish(){
-		StoreData storeData = new StoreData(this.getApplicationContext(), facade, null, groups);
+		ArrayList<Member> members = new ArrayList<Member>(facade.getMembers().values());
+		StoreData storeData = new StoreData(this.getApplicationContext(), members, groups);
 		storeData.execute();
 		super.finish();
 	}

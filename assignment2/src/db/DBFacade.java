@@ -10,16 +10,15 @@ import model.Member;
 public interface DBFacade {
 	DBWriter getWriter();
 	void setWriter(DBWriter writer);
-	void writeMember(String firstname, String lastname, String email) throws Exception;
-	void closeConnection();
 	Map<Integer, Member> getMembers();
-	void writeGroup(String groupname, List<Member> members);
+	void writeGroup(Group group);
 	void updateGroup(int groupId, String groupName, List<Member> membersInvited);
 	Map<Integer, Group> getGroups();
-	List <Member> getMembersInGroup(int groupid);
-	Group getGroupForId(int id);
-	void writeExpense(List<Member> recipients, double amount, String date,
-			String description, int groupid);
-	List<Expense> getExpensesPaidByMember(int memberid);
-	List<Expense> getExpensesPaidToMember(int memberid);
+	void writeExpense(Expense expense, List<Member> recipients);
+	void writeMember(Member member);
+	void writeMembers(List<Member> members);
+	void writeGroups(List<Group> groups);
+	void writeExpenses(List<Expense> expenses);
+	void clearDatabase();
+	void closeConnection();
 }

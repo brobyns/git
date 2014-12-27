@@ -9,17 +9,15 @@ import model.Member;
 import model.observer.Subject;
 
 public interface DBWriter extends Subject{	
-	void writeMember(String firstname, String lastname, String email) throws Exception;
+	void writeMember(Member member);
+	void writeMembers(List<Member> members);
 	Map<Integer, Member> getMembers();
-	void closeConnection();
 	Map<Integer, Group> getGroups();
-	void writeGroup(String groupname, List<Member> members);
-	List<Member> getMembersInGroup(int groupid);
-	Group getGroupForId(int id);
-	void writeExpense(List<Member> recipients, double amount, String date,
-			String description, int groupid);
-	List<Expense> getExpensesPaidByMember(int memberid);
-	List<Expense> getExpensesPaidToMember(int memberid);
+	void writeGroup(Group group);
+	void writeGroups(List<Group> groups);
+	void writeExpense(Expense expense, List<Member> recipients);
+	void writeExpenses(List<Expense> expenses);
 	void updateGroup(int groupid, String groupName, List<Member> membersInvited);
-	
+	void clearDatabase();
+	void closeConnection();
 }

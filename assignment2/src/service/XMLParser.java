@@ -16,6 +16,7 @@ import model.Member;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.util.Log;
 import android.util.Xml;
 
 public class XMLParser {
@@ -36,7 +37,7 @@ public class XMLParser {
 					continue;
 				}
 				String name = parser.getName();
-				if (name.equals("groups")) {
+				if (name.equals("members")) {
 					members = readMembers(parser);
 				}else if (name.equals("groups")) {
 					groups = readGroups(parser);
@@ -139,6 +140,7 @@ public class XMLParser {
 				skip(parser);
 			}	
 		}
+		Log.v("bram", id+ " " + firstname +" "+ lastname + " " + email);
 		return new Member(id, firstname, lastname, email, expenses);
 	}
 	
@@ -250,6 +252,37 @@ public class XMLParser {
 				depth++;
 				break;
 			}
+		}
+	}
+	
+	public Map<String, Object> readSettings(InputStream in) throws XmlPullParserException, IOException {
+		try {
+			XmlPullParser parser = Xml.newPullParser();
+			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+			parser.setInput(in, null);
+			parser.nextTag();
+			parser.require(XmlPullParser.START_TAG, ns, "settings");
+			Map map = new HashMap<String, Object>();
+			String currency = null;
+			Member member = null;
+			while (parser.next() != XmlPullParser.END_TAG) {
+				if (parser.getEventType() != XmlPullParser.START_TAG) {
+					continue;
+				}
+				String name = parser.getName();
+				if (name.equals("member")) {
+					member = readMember(parser);
+				}else if (name.equals("currency")) {
+					currency = readStringValue(parser, "currency");
+				}else{
+					skip(parser);
+				}
+			}  
+			map.put("member", member);
+			map.put("currency", currency);
+			return map;
+		} finally {
+			in.close();
 		}
 	}
 

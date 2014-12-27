@@ -14,9 +14,12 @@
     <string name="expense_detail_title">Expense detail</string>
     <string name="add_expense_title">Add Expense</string>
     <string name="settings_title">Settings</string>
+    <string name="create_member_title">Create member</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
-	<string name="invite_member">Invite member</string>
+    <string name="create">Create</string>
+	<string name="create_member">Create member</string>
+	<string name="invite_member">Invite</string>
 	<string name="placeholder_firstname">Enter your first name</string>
 	<string name="placeholder_lastname">Enter your last name</string>
 	<string name="placeholder_youremail">Enter your email address</string>

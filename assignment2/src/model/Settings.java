@@ -1,9 +1,5 @@
 package model;
 
-import java.util.ArrayList;
-
-import db.MemberDB;
-
 public class Settings {
 	public Member currentMember;
 	private String currency;

@@ -4,11 +4,12 @@ import java.util.ArrayList;
 
 import org.khl.assignment2.adapter.MemberDetailAdapter;
 
+import db.DBWriter;
 import model.Expense;
 import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
-
+import model.observer.Observer;
 import service.FetchData;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -21,7 +22,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class MemberDetailActivity extends ListActivity implements  OnItemClickListener{
+public class MemberDetailActivity extends ListActivity implements  OnItemClickListener, Observer{
 	
 	private TextView memberName, joinedOn, totalBalance;
 	private int memberid;
@@ -30,7 +31,8 @@ public class MemberDetailActivity extends ListActivity implements  OnItemClickLi
 	private Facade facade;
 	private MemberDetailAdapter memberDetailAdapt;
 	private ListView listView;
-	public static final String EXPENSE_ID = "expenseid";
+	private DBWriter dbWriter;
+	public static final String EXPENSE_ID = "expenseid", MEMBER_ID="memberId";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,8 @@ public class MemberDetailActivity extends ListActivity implements  OnItemClickLi
         fetchData = new FetchData(this.getApplicationContext());
         String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
+		dbWriter = facade.getDBWriter();
+		dbWriter.addObserver(this);
 		initializeComponents();
 	}
 
@@ -93,5 +97,13 @@ public class MemberDetailActivity extends ListActivity implements  OnItemClickLi
 		Intent intent = new Intent(MemberDetailActivity.this, ExpenseDetailActivity.class);
 		intent.putExtra(EXPENSE_ID, expense.getId());
 		startActivity(intent);
+	}
+
+	@Override
+	public void update() {
+		memberDetailAdapt = new MemberDetailAdapter(this, new ArrayList<Expense>(member.getExpenses().values()), facade, memberid);
+		memberDetailAdapt.notifyDataSetChanged();
+		listView.setAdapter(memberDetailAdapt);
+		
 	}
 }

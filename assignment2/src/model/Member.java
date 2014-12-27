@@ -1,13 +1,14 @@
 package model;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Member{
-	private int id;
+	private static int id = 0;
 	private String firstName, lastName;
 	private String email;
-	private Map<Integer, Expense> expenses;
+	private Map<Integer, Expense> expenses = new HashMap<Integer, Expense>();
 
 	public Member(int id, String firstName, String lastName, String email){
 		setId(id);
@@ -15,6 +16,15 @@ public class Member{
 		setLastName(lastName);
 		setEmail(email);
 	}
+	
+	public Member(String firstName, String lastName, String email){
+		id++;
+		setId(id);
+		setFirstName(firstName);
+		setLastName(lastName);
+		setEmail(email);
+	}
+	
 	
 	public Member(int id, String firstName, String lastName, String email, Map<Integer, Expense> expenses){
 		this(id, firstName, lastName, email);
@@ -50,6 +60,10 @@ public class Member{
 		return expenses;
 	}
 	
+	public void addExpense(Expense expense) {
+		expenses.put(expense.getId(), expense);
+	}
+	
 	public void setExpenses(Map<Integer, Expense> expenses){
 		this.expenses =  expenses;
 	}
@@ -57,4 +71,6 @@ public class Member{
 	public String toString(){
 		return getFirstName() + " " + getLastName();
 	}
+
+	
 }

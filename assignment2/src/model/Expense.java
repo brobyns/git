@@ -1,16 +1,25 @@
 package model;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class Expense {
-	private int id, senderId, groupId;
+	private static int id = 0; 
+	private int senderId, groupId;
 	private double amount;
 	private String type, description;
 	private String date;
 	private Set<Integer> membersPaidFor;
 
+	public Expense(int senderId, double amount, String date, String description, int groupId){
+		id++;
+		setId(id);
+		setSenderId(senderId);
+		setAmount(amount);
+		setDate(date);
+		setDescription(description);
+		setGroupId(groupId);
+	}
+	
 	public Expense(int id, int senderId, double amount, String date, String description){
 		setId(id);
 		setSenderId(senderId);

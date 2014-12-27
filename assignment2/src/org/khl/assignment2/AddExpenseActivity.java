@@ -8,6 +8,7 @@ import java.util.List;
 import org.khl.assignment2.adapter.AddedMemberAdapter;
 
 import service.FetchData;
+import model.Expense;
 import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
@@ -24,7 +25,7 @@ import android.widget.Spinner;
 public class AddExpenseActivity extends Activity implements OnItemSelectedListener {
 	private Facade facade;
 	private int groupid;
-	private EditText description, amount;
+	private EditText description, amountText;
 	private FetchData fetchData;
 	private Spinner spinner;
 	private ArrayAdapter<Member> memberAdapt;
@@ -55,7 +56,7 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 
 	private void initializeComponents(){
 		description = (EditText)findViewById(R.id.description);
-		amount = (EditText)findViewById(R.id.amount);
+		amountText = (EditText)findViewById(R.id.amount);
 		spinner = (Spinner) findViewById(R.id.spinner);
 		memberAdapt = new ArrayAdapter<Member>(this,  android.R.layout.simple_spinner_item, members);
 		memberAdapt.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -67,7 +68,10 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 	}
 
 	public void addExpense(View v){
-		facade.writeExpense(recipients, Double.parseDouble(amount.getText().toString()), getCurrentDateTime(), description.getText().toString(), groupid);
+		Double amount = Double.parseDouble(amountText.getText().toString());
+		Expense expense = new Expense(facade.getCurrentMember().getId(), amount, getCurrentDateTime(), description.getText().toString(), groupid);
+		facade.writeExpense(expense, recipients);
+		
 		finish();
 	}
 	

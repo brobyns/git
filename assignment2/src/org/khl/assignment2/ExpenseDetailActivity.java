@@ -2,29 +2,29 @@ package org.khl.assignment2;
 
 import org.khl.assignment2.adapter.MemberDetailAdapter;
 
+import db.DBWriter;
 import model.Expense;
+import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
+import model.observer.Observer;
 import service.FetchData;
+import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
 import android.widget.TextView;
 
-public class ExpenseDetailActivity extends ListActivity {
+public class ExpenseDetailActivity extends Activity implements Observer {
 	
 	private TextView member, amount, date, description;
 	private int expenseid;
 	private FetchData fetchData;
 	private Facade facade;
 	private MemberDetailAdapter memberDetailAdapt;
-	private ListView listView;
+	private DBWriter dbWriter;
 	public static final String EXPENSE_ID = "expenseid";
 
 	@Override
@@ -33,9 +33,11 @@ public class ExpenseDetailActivity extends ListActivity {
 		setContentView(R.layout.activity_expense_detail);
 		Bundle b = getIntent().getExtras();
         expenseid = b.getInt(MemberDetailActivity.EXPENSE_ID);
-        fetchNewData();
+        fetchData = new FetchData(this.getApplicationContext());
         String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
+		dbWriter = facade.getDBWriter();
+		dbWriter.addObserver(this);
 		initializeComponents();
 	}
 
@@ -44,9 +46,6 @@ public class ExpenseDetailActivity extends ListActivity {
 		amount = (TextView)findViewById(R.id.amount);
 		date = (TextView)findViewById(R.id.date);
 		description = (TextView)findViewById(R.id.description);
-		listView = (ListView)findViewById(android.R.id.list);
-//		memberDetailAdapt = new MemberDetailAdapter(this, facade, expenseid);  	//implement
-		listView.setAdapter(memberDetailAdapt);
 	}
 	
 	
@@ -84,5 +83,11 @@ public class ExpenseDetailActivity extends ListActivity {
 			return true;
 		} 
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void update() {
+		// TODO Auto-generated method stub
+		
 	}
 }

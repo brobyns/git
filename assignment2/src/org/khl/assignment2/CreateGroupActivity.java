@@ -11,6 +11,7 @@ import model.Group;
 import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
+import model.observer.Observer;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,7 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 
-public class CreateGroupActivity extends ListActivity implements OnItemSelectedListener{
+public class CreateGroupActivity extends ListActivity implements OnItemSelectedListener, Observer{
 	private LinearLayout groupsLayout;
 	private Facade facade;
 	private Group group;
@@ -50,6 +51,7 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 		fetchData = new FetchData(this.getApplicationContext());
 		String dbWriterType = (fetchData.checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
+		facade.getDBWriter().addObserver(this);
 		members = new ArrayList<Member>(facade.getMembers().values());
 		Bundle b = getIntent().getExtras();
 		if(b != null){
@@ -61,7 +63,7 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 
 	private void loadIntentData(Bundle b){
 		int groupid = b.getInt(GroupDetailActivity.GROUP_ID);
-		group = facade.getGroupForId(groupid);
+		group = facade.getGroups().get(groupid);
 		membersInvited = group.getMembers();
 		for(Member m : membersInvited){
 			members.remove(m);
@@ -112,8 +114,8 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 	}
 
 	public void createGroup(View v){
-		String groupName = groupNameField.getText().toString();
-		facade.createGroup(groupName, membersInvited);
+		Group group = new Group(groupNameField.getText().toString(), membersInvited);
+		facade.createGroup(group);
 		finish();
 	}
 	
@@ -123,6 +125,11 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 		finish();
 	}
 
+	public void createMember(View v){
+		Intent intent = new Intent(CreateGroupActivity.this, CreateMemberActivity.class);
+		startActivity(intent);
+	}
+	
 	public void invite(View v){
 		if(selectedMember != null){
 			membersInvited.add(selectedMember);
@@ -132,10 +139,6 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 			}
 			refreshData();
 			Log.v("bram", "invite:" + membersInvited.size()+"");
-		}
-		String email = emailField.getText().toString();
-		if(isValidEmail(email)){
-			//implement
 		}
 	}
 
@@ -147,11 +150,6 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 
 	public void cancel(View v){
 		finish();
-	}
-
-	private boolean isValidEmail(String email){
-		//implement
-		return true;
 	}
 
 	@Override
@@ -183,5 +181,14 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 
 	public void finish(){
 		super.finish();
+	}
+
+	@Override
+	public void update() {
+		members = new ArrayList<Member>(facade.getMembers().values());
+		memberAdapt = new ArrayAdapter<Member>(this,  android.R.layout.simple_spinner_item, members);
+		memberAdapt.notifyDataSetChanged();
+		spinner.setAdapter(memberAdapt);	
+		Log.v("bram", "update");
 	}
 }
