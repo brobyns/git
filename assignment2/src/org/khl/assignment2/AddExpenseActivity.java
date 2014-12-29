@@ -14,6 +14,7 @@ import model.Facade.Facade;
 import model.Facade.FacadeImpl;
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -41,17 +42,11 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 		setContentView(R.layout.activity_add_expense);
 		Bundle b = getIntent().getExtras();
         groupid = b.getInt(GroupDetailActivity.GROUP_ID);
-		//fetchNewData();
 		fetchData = new FetchData(this.getApplicationContext());
 		String dbWriterType = (fetchData.checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
 		members = new ArrayList<Member>(facade.getMembers().values());
 		initializeComponents();
-	}
-	
-
-	private void fetchNewData(){
-		fetchData.execute();
 	}
 
 	private void initializeComponents(){

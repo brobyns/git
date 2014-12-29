@@ -39,7 +39,6 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
         setContentView(R.layout.activity_group_detail);
         Bundle b = getIntent().getExtras();
         groupid = b.getInt(MainActivity.GROUP_ID);
-        //fetchNewData();
         fetchData = new FetchData(this.getApplicationContext());
         String dbWriterType = (fetchData.checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
@@ -48,15 +47,11 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
         initializeComponents();
 		
     }
-	
-	private void fetchNewData(){
-		fetchData = new FetchData(this.getApplicationContext());
-		fetchData.execute();
-	}
-	
+
 	private void initializeComponents(){
 		memberName = (TextView)findViewById(R.id.memberName);
 		listView = (ListView)findViewById(android.R.id.list);
+		Log.v("bram", facade.getGroups().size()+"");
 		detailAdapt=new GroupDetailAdapter(this, facade.getGroups().get(groupid).getMembers(), facade);
 		listView.setAdapter(detailAdapt);
 		listView.setOnItemClickListener(this);

@@ -6,7 +6,7 @@ import java.util.Map;
 import model.Member;
 
 public class MemberDB {
-	private Member CurrMember;
+	private Member currMember;
 	private Map<Integer, Member> members;
 	private volatile static MemberDB instance;
 	
@@ -50,11 +50,12 @@ public class MemberDB {
 	}
 	
 	public Member getCurrMember() {
-		return CurrMember;
+		return currMember;
 	}
 	
 	public void setCurrMember(Member currMember) {
-		CurrMember = currMember;
+		this.currMember = currMember;
+		addMember(currMember);
 	}
 	
 	public Map<Integer, Member> getMembers() {

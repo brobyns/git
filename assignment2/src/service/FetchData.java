@@ -66,7 +66,6 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 					memberDB.addMembers(members);
 					groups = facade.getGroupsOnline();
 					groupDB.setGroups(groups);
-					Log.v("bram", "online");
 				}else{
 					getXMLData();
 					facade.clearDatabase();
@@ -158,8 +157,7 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 			settings.setCurrentMember(member);
 			settings.setCurrency(currency);
 			settingsLoaded = true;
-			Log.v("bram", "settings: " +member.toString());
-			memberDB.addMember(member);
+			memberDB.setCurrMember(member);
 		} catch (XmlPullParserException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

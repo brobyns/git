@@ -227,7 +227,6 @@ public class OnlineDBWriter implements DBWriter {
 			statement.setString(4, expense.getDescription());
 			statement.setInt(5, expense.getGroupId());
 			statement.executeUpdate();
-			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} 
@@ -261,8 +260,8 @@ public class OnlineDBWriter implements DBWriter {
 				statement.setInt(1, expenseid);
 				statement.setInt(2, recipients.get(i).getId());
 				statement.executeUpdate();
-				notifyObservers();
-			}
+				}
+			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
