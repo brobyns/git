@@ -57,7 +57,6 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 		if(b != null){
 			loadIntentData(b);
 		}
-		//fetchNewData();
 		initializeComponents();
 	}
 
@@ -70,10 +69,6 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 		}
 		groupName = group.getName();
 		setTitle("Manage group");
-	}
-
-	private void fetchNewData(){
-		fetchData.execute();
 	}
 
 	private void initializeComponents(){

@@ -55,7 +55,6 @@ public class MemberDB {
 	
 	public void setCurrMember(Member currMember) {
 		this.currMember = currMember;
-		addMember(currMember);
 	}
 	
 	public Map<Integer, Member> getMembers() {

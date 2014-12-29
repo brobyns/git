@@ -17,6 +17,7 @@ import java.util.Set;
 import model.Expense;
 import model.Group;
 import model.Member;
+import model.Settings;
 import model.observer.Observer;
 
 import android.os.StrictMode;
@@ -31,6 +32,7 @@ public class OnlineDBWriter implements DBWriter {
 	private volatile static DBWriter instance;
 	private MemberDB memberDB = MemberDB.getInstance();
 	private GroupDB groupDB = GroupDB.getInstance();
+	private Settings settings = Settings.getInstance();
 	private static final String JDBC_DRIVER = "org.postgresql.Driver";
 	private static final String DB_URL = "jdbc:postgresql://gegevensbanken.khleuven.be:51415/probeer";
 
@@ -219,14 +221,17 @@ public class OnlineDBWriter implements DBWriter {
 
 	@Override
 	public void writeExpense(Expense expense, List<Member> recipients){
+		int senderid = getIdCurrentMember();
 		try {
 			statement = connection.prepareStatement("INSERT INTO expense (senderid, amount, expensedate, description, groupid) VALUES(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-			statement.setInt(1, expense.getSenderId());
+			statement.setInt(1, senderid);
 			statement.setDouble(2, expense.getAmount());
 			statement.setString(3, expense.getDate());
 			statement.setString(4, expense.getDescription());
 			statement.setInt(5, expense.getGroupId());
 			statement.executeUpdate();
+			memberDB.getCurrMember().addExpense(expense);
+			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} 
@@ -241,7 +246,7 @@ public class OnlineDBWriter implements DBWriter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void writeExpenses(List<Expense> expenses){
 		Map<Integer,Member> membersMap = getMembers();
 		ArrayList<Member> members = new ArrayList<Member>();
@@ -260,7 +265,7 @@ public class OnlineDBWriter implements DBWriter {
 				statement.setInt(1, expenseid);
 				statement.setInt(2, recipients.get(i).getId());
 				statement.executeUpdate();
-				}
+			}
 			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -342,7 +347,6 @@ public class OnlineDBWriter implements DBWriter {
 				statement.executeUpdate();
 				groupDB.addGroup(group);	
 			}
-			Log.v("bram", "create");
 			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -358,7 +362,7 @@ public class OnlineDBWriter implements DBWriter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void writeGroups(List<Group> groups){
 		for(Group g : groups){
 			writeGroup(g);
@@ -426,6 +430,76 @@ public class OnlineDBWriter implements DBWriter {
 			}
 		}
 		return groups;
+	}
+
+
+
+	@Override
+	public void writeSettings(Settings settings) {
+		try {
+			Member m = settings.getCurrentMember();
+			statement = connection.prepareStatement("INSERT INTO member (firstname, lastname, email) VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS);
+			statement.setString(1, m.getFirstName());
+			statement.setString(2, m.getLastName());
+			statement.setString(3, m.getEmail());
+			statement.executeUpdate();
+			memberDB.addMember(m);
+			ResultSet set = statement.getGeneratedKeys();
+			if(set.next()){		
+				statement = connection.prepareStatement("INSERT INTO settings (id, currency) VALUES(?,?)");
+				statement.setInt(1, set.getInt(1));
+				statement.setString(2, settings.getCurrency());
+				statement.executeUpdate();
+				notifyObservers();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally{
+			try {
+				statement.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private int getIdCurrentMember(){
+		int id=-1;
+		try {
+			statement = connection.prepareStatement("SELECT * FROM settings");
+			ResultSet set = statement.executeQuery();
+			if(set.next()){		
+				id = set.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return id;
+	}
+
+	public Settings getSettings() {
+		try {
+			statement = connection.prepareStatement("SELECT * FROM settings");
+			ResultSet set = statement.executeQuery();
+			settings.setCurrency(set.getString(2));
+			int memberid = set.getInt(1);
+			String stmt = "SELECT * FROM member WHERE id = ?";
+			statement = connection.prepareStatement(stmt);
+			statement.setInt(1, memberid);
+			set = statement.executeQuery();
+			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
+				settings.setCurrentMember(new Member(set.getInt(1),set.getString(2),set.getString(3),set.getString(4)));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally{
+			try{
+				statement.close();
+			}catch(SQLException e){
+				e.printStackTrace();
+			}
+		}
+		return settings;
 	}
 
 	@Override

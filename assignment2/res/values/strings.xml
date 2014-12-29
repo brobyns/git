@@ -28,6 +28,9 @@
 	<string name="placeholder_amount">Enter an amount</string>
 	<string name="placeholder_type_expense">Enter a type of expense</string>
 	<string name="placeholder_description">Enter a description (optional)</string>
+	<string name="error_email">Email address is not valid!</string>
+	<string name="error_alpha">Only alphabetical characters are allowed!</string>
+	<string name="error_amount">Amount is not valid!</string>
 	<string name="admin">Admin: </string>
 	<string name="total_balance">Total Balance: </string>
 	<string name="add_recipient">Add recipient</string>

@@ -98,4 +98,9 @@ public class OfflineDBWriter implements DBWriter {
 	public Map<Integer, Member> getMembers() {
 		return memberDB.getMembers();
 	}
+
+	@Override
+	public void writeSettings(Settings settings) {
+		// TODO Auto-generated method stub
+	}
 }

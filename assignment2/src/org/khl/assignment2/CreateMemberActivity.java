@@ -5,6 +5,7 @@ import model.Facade.Facade;
 import model.Facade.FacadeImpl;
 
 import service.FetchData;
+import service.Validator;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,9 +37,13 @@ public class CreateMemberActivity extends Activity{
 		String firstname = firstnameText.getText().toString();
 		String lastname = lastnameText.getText().toString();
 		String email = emailText.getText().toString();
-		Member member = new Member(firstname, lastname , email);
-		facade.createMember(member);
-		finish();
+		if(Validator.isValidEmailAddress(email)){
+			Member member = new Member(firstname, lastname , email);
+			facade.createMember(member);
+			finish();
+		}else{
+			emailText.setError(getString(R.string.error_email));
+		}
 	}
 
 	public void cancel(View v){

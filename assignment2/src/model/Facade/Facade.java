@@ -10,6 +10,7 @@ import db.DBWriter;
 import model.Expense;
 import model.Group;
 import model.Member;
+import model.Settings;
 
 public interface Facade {
 
@@ -33,5 +34,5 @@ public interface Facade {
 	void clearDatabase();
 	boolean checkIfNewDataAvailable();
 	void createMember(Member member);
-	void writeSettings(Context context, Member member, String currency);
+	void writeSettings(Context context, Settings settings);
 }

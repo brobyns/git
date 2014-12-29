@@ -6,6 +6,7 @@ import java.util.Map;
 import model.Expense;
 import model.Group;
 import model.Member;
+import model.Settings;
 import model.observer.Subject;
 
 public interface DBWriter extends Subject{	
@@ -20,4 +21,5 @@ public interface DBWriter extends Subject{
 	void updateGroup(int groupid, String groupName, List<Member> membersInvited);
 	void clearDatabase();
 	void closeConnection();
+	void writeSettings(Settings settings);
 }

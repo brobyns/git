@@ -6,6 +6,7 @@ import java.util.Map;
 import model.Expense;
 import model.Group;
 import model.Member;
+import model.Settings;
 
 public interface DBFacade {
 	DBWriter getWriter();
@@ -21,4 +22,5 @@ public interface DBFacade {
 	void writeExpenses(List<Expense> expenses);
 	void clearDatabase();
 	void closeConnection();
+	void writeSettings(Settings settings);
 }

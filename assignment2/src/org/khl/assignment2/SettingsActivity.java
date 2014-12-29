@@ -1,10 +1,12 @@
 package org.khl.assignment2;
 
 import model.Member;
+import model.Settings;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
 
 import service.FetchData;
+import service.Validator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +21,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 public class SettingsActivity extends Activity implements OnItemSelectedListener {
 	private Facade facade;
 	private FetchData fetchData;
+	private Settings settings;
 	private Spinner spinner;
 	private EditText firstname, lastname, email;
 	private String[] currencies = {"EUR", "GBP", "USD"};
@@ -58,11 +61,18 @@ public class SettingsActivity extends Activity implements OnItemSelectedListener
 	}
 	
 	public void save(View v){
+		if(Validator.isValidEmailAddress(email.getText().toString())){
 		Member member = new Member(firstname.getText().toString(),lastname.getText().toString(),
 							email.getText().toString());
-		facade.writeSettings(context, member, currency);
+		settings = Settings.getInstance();
+		settings.setCurrentMember(member);
+		settings.setCurrency(currency);
+		facade.writeSettings(context, settings);
 		Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
 		startActivity(intent);	
+		}else{
+			email.setError(getString(R.string.error_email));
+		}
 	}
 	
 	public void cancel(View v){

@@ -1307,11 +1307,11 @@ containing a value of this type.
          */
         public static final int abc_shareactionprovider_share_with_application=0x7f0a000b;
         public static final int action_settings=0x7f0a0011;
-        public static final int add=0x7f0a0034;
+        public static final int add=0x7f0a0037;
         public static final int add_expense_title=0x7f0a0018;
-        public static final int add_recipient=0x7f0a002a;
-        public static final int admin=0x7f0a0028;
-        public static final int amount=0x7f0a0030;
+        public static final int add_recipient=0x7f0a002d;
+        public static final int admin=0x7f0a002b;
+        public static final int amount=0x7f0a0033;
         public static final int app_name=0x7f0a000d;
         public static final int cancel=0x7f0a001b;
         public static final int create=0x7f0a001d;
@@ -1319,21 +1319,24 @@ containing a value of this type.
         public static final int create_group_title=0x7f0a0015;
         public static final int create_member=0x7f0a001e;
         public static final int create_member_title=0x7f0a001a;
-        public static final int date=0x7f0a0031;
-        public static final int description=0x7f0a002f;
+        public static final int date=0x7f0a0034;
+        public static final int description=0x7f0a0032;
+        public static final int error_alpha=0x7f0a0029;
+        public static final int error_amount=0x7f0a002a;
+        public static final int error_email=0x7f0a0028;
         public static final int expense_detail_title=0x7f0a0017;
         public static final int group_detail_title=0x7f0a0014;
         public static final int groups_title=0x7f0a0013;
         public static final int invite_member=0x7f0a001f;
-        public static final int joined_on=0x7f0a002e;
-        public static final int manage_group=0x7f0a0033;
-        public static final int member=0x7f0a002c;
+        public static final int joined_on=0x7f0a0031;
+        public static final int manage_group=0x7f0a0036;
+        public static final int member=0x7f0a002f;
         public static final int member_detail_title=0x7f0a0016;
-        public static final int members=0x7f0a002d;
+        public static final int members=0x7f0a0030;
         public static final int menu_create_group=0x7f0a000f;
         public static final int menu_groups=0x7f0a000e;
         public static final int menu_invitations=0x7f0a0010;
-        public static final int no_members=0x7f0a0036;
+        public static final int no_members=0x7f0a0039;
         public static final int placeholder_amount=0x7f0a0025;
         public static final int placeholder_description=0x7f0a0027;
         public static final int placeholder_email=0x7f0a0024;
@@ -1342,12 +1345,12 @@ containing a value of this type.
         public static final int placeholder_lastname=0x7f0a0021;
         public static final int placeholder_type_expense=0x7f0a0026;
         public static final int placeholder_youremail=0x7f0a0022;
-        public static final int recipients=0x7f0a0035;
+        public static final int recipients=0x7f0a0038;
         public static final int save=0x7f0a001c;
-        public static final int select_currency=0x7f0a002b;
+        public static final int select_currency=0x7f0a002e;
         public static final int settings_title=0x7f0a0019;
-        public static final int settle_payments=0x7f0a0032;
-        public static final int total_balance=0x7f0a0029;
+        public static final int settle_payments=0x7f0a0035;
+        public static final int total_balance=0x7f0a002c;
     }
     public static final class style {
         /** 

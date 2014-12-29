@@ -8,6 +8,7 @@ import java.util.List;
 import org.khl.assignment2.adapter.AddedMemberAdapter;
 
 import service.FetchData;
+import service.Validator;
 import model.Expense;
 import model.Member;
 import model.Facade.Facade;
@@ -41,15 +42,16 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_expense);
 		Bundle b = getIntent().getExtras();
-        groupid = b.getInt(GroupDetailActivity.GROUP_ID);
+		groupid = b.getInt(GroupDetailActivity.GROUP_ID);
 		fetchData = new FetchData(this.getApplicationContext());
 		String dbWriterType = (fetchData.checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
-		members = new ArrayList<Member>(facade.getMembers().values());
 		initializeComponents();
 	}
 
 	private void initializeComponents(){
+		members = new ArrayList<Member>(facade.getGroups().get(groupid).getMembers());
+		members.remove(facade.getCurrentMember());
 		description = (EditText)findViewById(R.id.description);
 		amountText = (EditText)findViewById(R.id.amount);
 		spinner = (Spinner) findViewById(R.id.spinner);
@@ -63,19 +65,20 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 	}
 
 	public void addExpense(View v){
-		Double amount = Double.parseDouble(amountText.getText().toString());
-		Expense expense = new Expense(facade.getCurrentMember().getId(), amount, getCurrentDateTime(), description.getText().toString(), groupid);
-		facade.writeExpense(expense, recipients);
-		
-		finish();
+		if(Validator.isValidAmount(amountText.getText().toString())){
+			Double amount = Double.parseDouble(amountText.getText().toString());
+			Expense expense = new Expense(facade.getCurrentMember().getId(), amount, getCurrentDateTime(), description.getText().toString(), groupid);
+			facade.writeExpense(expense, recipients);
+			finish();
+		}else{
+			amountText.setError(getString(R.string.error_amount));
+		}
 	}
-	
+
 	private String getCurrentDateTime(){
 		Calendar c = Calendar.getInstance();
-        System.out.println("Current time => "+c.getTime());
-
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        return df.format(c.getTime());
+		SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		return df.format(c.getTime());
 	}
 
 	public void cancel(View v){
@@ -110,6 +113,6 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

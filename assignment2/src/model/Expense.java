@@ -1,5 +1,6 @@
 package model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Expense {
@@ -9,7 +10,7 @@ public class Expense {
 	private double amount;
 	private String type, description;
 	private String date;
-	private Set<Integer> membersPaidFor;
+	private Set<Integer> membersPaidFor = new HashSet<Integer>();
 
 	public Expense(int senderId, double amount, String date, String description, int groupId){
 		counter++;

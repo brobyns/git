@@ -3,9 +3,12 @@ package db;
 import java.util.List;
 import java.util.Map;
 
+import android.util.Log;
+
 import model.Expense;
 import model.Group;
 import model.Member;
+import model.Settings;
 
 public class DBFacadeImpl implements DBFacade {
 
@@ -52,6 +55,7 @@ public class DBFacadeImpl implements DBFacade {
 	
 
 	public void writeExpense(Expense expense, List<Member> recipients){
+		Log.v("bram", expense.getId()+ " "+ expense.getAmount()+" sender: "+ expense.getSenderId());
 		writer.writeExpense(expense, recipients);
 	}
 
@@ -75,5 +79,10 @@ public class DBFacadeImpl implements DBFacade {
 	@Override
 	public void writeMember(Member member) {
 		writer.writeMember(member);
+	}
+
+	@Override
+	public void writeSettings(Settings settings) {
+		writer.writeSettings(settings);
 	}
 }

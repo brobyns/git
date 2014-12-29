@@ -140,9 +140,9 @@ public class FacadeImpl implements Facade{
 	}
 
 	@Override
-	public void writeSettings(Context context, Member member, String currency) {
+	public void writeSettings(Context context, Settings settings) {
 		StoreData storeData = new StoreData(context, null, null);
-		storeData.saveSettings(member, currency);
-		createMember(member);
+		dbFacade.writeSettings(settings);
+		storeData.saveSettings(settings);
 	}
 }

@@ -52,7 +52,6 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 		facade = new FacadeImpl(dbWriterType);
 		dbWriter = facade.getDBWriter();
 		dbWriter.addObserver(this);
-		Log.v("bram", "add Observer");
 		initializeComponents();
 	}
 
@@ -65,9 +64,6 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 	
 	public void setAdapter(){
 		groups = new ArrayList<Group>(facade.getGroups().values());
-		for(Group g : groups){
-			Log.v("bram", g.getName());
-		}
 		overviewAdapt=new GroupOverviewAdapter(this, groups);
 		overviewAdapt.notifyDataSetChanged();
 		listView.setAdapter(overviewAdapt);

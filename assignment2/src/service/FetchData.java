@@ -156,8 +156,11 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 			String currency = (String)settingsMap.get("currency");
 			settings.setCurrentMember(member);
 			settings.setCurrency(currency);
+			facade.writeSettings(context, settings);
 			settingsLoaded = true;
 			memberDB.setCurrMember(member);
+			memberDB.addMember(member);
+			facade.createMember(member);
 		} catch (XmlPullParserException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
