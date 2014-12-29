@@ -33,9 +33,7 @@ public class OfflineDBWriter implements DBWriter {
 	
 	@Override
 	public void writeMember(Member member) {
-		Log.v("bram", memberDB.getMembers().size()+"");
 		memberDB.addMember(member);
-		Log.v("bram", memberDB.getMembers().size()+"");
 		notifyObservers();
 	}
 
@@ -72,6 +70,7 @@ public class OfflineDBWriter implements DBWriter {
 
 	@Override
 	public void addObserver(Observer o) {
+		Log.v("bram", "add observer writer offline");
 		observers.add(o);
 	}
 

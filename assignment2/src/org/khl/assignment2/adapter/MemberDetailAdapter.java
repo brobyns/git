@@ -52,7 +52,6 @@ public class MemberDetailAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		Log.v("test", "pos" + position);
 		View view = convertView;
 		
 		

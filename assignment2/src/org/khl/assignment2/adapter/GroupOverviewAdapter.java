@@ -38,7 +38,7 @@ public class GroupOverviewAdapter extends BaseAdapter {
 	}
 
 	public long getItemId(int position) {
-		return position;
+		return groups.get(position).getId();
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {

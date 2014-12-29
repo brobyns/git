@@ -140,7 +140,6 @@ public class XMLParser {
 				skip(parser);
 			}	
 		}
-		Log.v("bram", id+ " " + firstname +" "+ lastname + " " + email);
 		return new Member(id, firstname, lastname, email, expenses);
 	}
 	

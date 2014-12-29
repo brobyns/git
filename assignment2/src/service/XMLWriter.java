@@ -105,6 +105,9 @@ public class XMLWriter {
 		xmlSerializer.startDocument("UTF-8", true);
 		xmlSerializer.startTag("", "settings");
 			xmlSerializer.startTag("", "member");
+				xmlSerializer.startTag("", "memberid");
+					xmlSerializer.text(member.getId()+"");
+				xmlSerializer.endTag("", "memberid");
 				xmlSerializer.startTag("", "firstname");
 					xmlSerializer.text(member.getFirstName());
 				xmlSerializer.endTag("", "firstname");

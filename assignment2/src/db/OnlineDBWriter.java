@@ -20,19 +20,21 @@ import model.Member;
 import model.observer.Observer;
 
 import android.os.StrictMode;
+import android.util.Log;
 
 public class OnlineDBWriter implements DBWriter {
 
 	private Connection connection;
 	private PreparedStatement statement;
 	private Properties connectionProperties;
-	private ArrayList<Observer> observers;
+	private ArrayList<Observer> observers = new ArrayList<Observer>();
 	private volatile static DBWriter instance;
+	private MemberDB memberDB = MemberDB.getInstance();
+	private GroupDB groupDB = GroupDB.getInstance();
 	private static final String JDBC_DRIVER = "org.postgresql.Driver";
 	private static final String DB_URL = "jdbc:postgresql://gegevensbanken.khleuven.be:51415/probeer";
 
 	private OnlineDBWriter(){
-		observers = new ArrayList<Observer>();
 		if (android.os.Build.VERSION.SDK_INT >= 9) {														//Schijnt kan SDK <= 9 geen HTTP connecties maken
 			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 			StrictMode.setThreadPolicy(policy);
@@ -103,6 +105,8 @@ public class OnlineDBWriter implements DBWriter {
 				statement.setString(2, member.getLastName());
 				statement.setString(3, member.getEmail());
 				statement.executeUpdate();
+				memberDB.addMember(member);
+				notifyObservers();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -223,6 +227,7 @@ public class OnlineDBWriter implements DBWriter {
 			statement.setString(4, expense.getDescription());
 			statement.setInt(5, expense.getGroupId());
 			statement.executeUpdate();
+			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} 
@@ -256,6 +261,7 @@ public class OnlineDBWriter implements DBWriter {
 				statement.setInt(1, expenseid);
 				statement.setInt(2, recipients.get(i).getId());
 				statement.executeUpdate();
+				notifyObservers();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -293,6 +299,7 @@ public class OnlineDBWriter implements DBWriter {
 		try {
 			statement = connection.prepareStatement ("UPDATE groups SET groupname = '" + groupname + "' WHERE id='"+ groupid + "'");
 			statement.executeUpdate();
+			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -313,8 +320,9 @@ public class OnlineDBWriter implements DBWriter {
 				statement = connection.prepareStatement("INSERT INTO group_member (groupid, memberid) VALUES(?,?)");
 				statement.setInt(1, groupid);
 				statement.setInt(2, members.get(i).getId());
-				statement.executeUpdate();
+				statement.executeUpdate();	
 			}
+			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -333,7 +341,10 @@ public class OnlineDBWriter implements DBWriter {
 				statement = connection.prepareStatement("INSERT INTO groups (groupname) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
 				statement.setString(1, group.getName());
 				statement.executeUpdate();
+				groupDB.addGroup(group);	
 			}
+			Log.v("bram", "create");
+			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -361,8 +372,9 @@ public class OnlineDBWriter implements DBWriter {
 				statement = connection.prepareStatement("INSERT INTO group_member (groupid, memberid) VALUES(?,?)");
 				statement.setInt(1, groupid);
 				statement.setInt(2, members.get(i).getId());
-				statement.executeUpdate();
+				statement.executeUpdate();	
 			}
+			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally{
@@ -426,6 +438,7 @@ public class OnlineDBWriter implements DBWriter {
 
 	@Override
 	public void addObserver(Observer o) {
+		Log.v("bram", "add observer writer");
 		observers.add(o);
 	}
 

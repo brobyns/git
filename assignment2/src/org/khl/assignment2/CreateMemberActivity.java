@@ -37,7 +37,6 @@ public class CreateMemberActivity extends Activity{
 		String lastname = lastnameText.getText().toString();
 		String email = emailText.getText().toString();
 		Member member = new Member(firstname, lastname , email);
-		Log.v("bram", member.getId() +" "+ member.getFirstName());
 		facade.createMember(member);
 		finish();
 	}

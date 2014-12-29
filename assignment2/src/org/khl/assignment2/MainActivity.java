@@ -1,31 +1,23 @@
 package org.khl.assignment2;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.khl.assignment2.adapter.GroupOverviewAdapter;
 
 import db.DBWriter;
 
-import service.AssetsPropertyReader;
 import service.FetchData;
 import service.StoreData;
-import service.XMLParser;
-import service.XMLWriter;
 
 import model.Group;
 import model.Member;
-import model.Settings;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
 import model.observer.Observer;
 
 import android.app.ListActivity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -55,30 +47,29 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		fetchNewData();
+		fetchData = new FetchData(this.getApplicationContext());
 		String dbWriterType = (fetchData.isConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
 		dbWriter = facade.getDBWriter();
 		dbWriter.addObserver(this);
+		Log.v("bram", "add Observer");
 		initializeComponents();
-	}
-
-	private void fetchNewData(){
-		fetchData = new FetchData(this.getApplicationContext());
-		fetchData.addObserver(this);
-		
-		fetchData.execute();
 	}
 
 	private void initializeComponents() {
 		groupsLayout = (LinearLayout)findViewById(R.id.groupsLayout);
 		createBtn = (Button)findViewById(R.id.createBtn);
 		listView = (ListView)findViewById(android.R.id.list);
+		setAdapter();
 	}
 	
 	public void setAdapter(){
 		groups = new ArrayList<Group>(facade.getGroups().values());
+		for(Group g : groups){
+			Log.v("bram", g.getName());
+		}
 		overviewAdapt=new GroupOverviewAdapter(this, groups);
+		overviewAdapt.notifyDataSetChanged();
 		listView.setAdapter(overviewAdapt);
 		listView.setOnItemClickListener(this);
 	}
@@ -135,5 +126,6 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 	@Override
 	public void update() {
 		setAdapter();
+		Log.v("bram", "update");
 	}
 }

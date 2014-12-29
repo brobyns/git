@@ -133,12 +133,12 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 	public void invite(View v){
 		if(selectedMember != null){
 			membersInvited.add(selectedMember);
+			Log.v("bram", selectedMember.getId()+" "+selectedMember.getFirstName());
 			members.remove(selectedMember);
 			if(members.isEmpty()){
 				selectedMember = null;
 			}
 			refreshData();
-			Log.v("bram", "invite:" + membersInvited.size()+"");
 		}
 	}
 
@@ -188,7 +188,6 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 		members = new ArrayList<Member>(facade.getMembers().values());
 		memberAdapt = new ArrayAdapter<Member>(this,  android.R.layout.simple_spinner_item, members);
 		memberAdapt.notifyDataSetChanged();
-		spinner.setAdapter(memberAdapt);	
-		Log.v("bram", "update");
+		spinner.setAdapter(memberAdapt);
 	}
 }

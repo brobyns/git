@@ -25,6 +25,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 
@@ -48,6 +49,7 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 	protected void onPreExecute() {
 		super.onPreExecute();
 		String dbWriterType = (checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
+		Log.v("bram", dbWriterType);
 		facade = new FacadeImpl(dbWriterType);
 	}
 
@@ -61,9 +63,10 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 			} else {		  //ONLINE
 				if(facade.checkIfNewDataAvailable()){			
 					members = facade.getMembersOnline();
-					memberDB.setMembers(members);
+					memberDB.addMembers(members);
 					groups = facade.getGroupsOnline();
 					groupDB.setGroups(groups);
+					Log.v("bram", "online");
 				}else{
 					getXMLData();
 					facade.clearDatabase();
@@ -130,7 +133,7 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 		}
 		try {
 			members = xmlParser.parse(fin).get("members");
-			memberDB.setMembers(members);
+			memberDB.addMembers(members);
 			groups = xmlParser.parse(fin).get("groups");
 			groupDB.setGroups(groups);
 		} catch (XmlPullParserException e) {
@@ -155,6 +158,8 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 			settings.setCurrentMember(member);
 			settings.setCurrency(currency);
 			settingsLoaded = true;
+			Log.v("bram", "settings: " +member.toString());
+			memberDB.addMember(member);
 		} catch (XmlPullParserException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

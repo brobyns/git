@@ -1,11 +1,11 @@
 package model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Member{
-	private static int id = 0;
+	private static int counter = 0;
+	private int id;
 	private String firstName, lastName;
 	private String email;
 	private Map<Integer, Expense> expenses = new HashMap<Integer, Expense>();
@@ -17,18 +17,18 @@ public class Member{
 		setEmail(email);
 	}
 	
+	public Member(int id, String firstName, String lastName, String email, Map<Integer, Expense> expenses){
+		this(id, firstName, lastName, email);
+		setExpenses(expenses);
+	}
+	
 	public Member(String firstName, String lastName, String email){
-		id++;
+		counter++;
+		id = counter;
 		setId(id);
 		setFirstName(firstName);
 		setLastName(lastName);
 		setEmail(email);
-	}
-	
-	
-	public Member(int id, String firstName, String lastName, String email, Map<Integer, Expense> expenses){
-		this(id, firstName, lastName, email);
-		setExpenses(expenses);
 	}
 
 	public int getId() {

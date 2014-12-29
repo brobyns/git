@@ -3,13 +3,15 @@ package model;
 import java.util.List;
 
 public class Group {
-	private static int id = 0;
+	private static int counter = 0;
+	private int id;
 	private Admin admin;
 	private String name;
 	private List<Member> members;
 	
 	public Group(String groupname, List<Member> members){
-		id++;
+		counter++;
+		id = counter;
 		setId(id);
 		setName(groupname);
 		setMembers(members);

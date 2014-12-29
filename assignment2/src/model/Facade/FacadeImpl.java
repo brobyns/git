@@ -1,12 +1,11 @@
 package model.Facade;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
+import android.util.Log;
 
 import service.StoreData;
-import service.XMLWriter;
 
 import model.Expense;
 import model.Group;
@@ -88,11 +87,11 @@ public class FacadeImpl implements Facade{
 		Map<Integer, Member> members = getMembers();
 		double amount = 0;		
 		Member me = members.get(settings.getCurrentMember().getId());
-		for(Expense e : me.getExpenses().values()){
-			if(e.getMembersPaidFor().contains(memberid)){					//I paid member
-				amount += e.getAmount()/e.getMembersPaidFor().size(); 
+			for(Expense e : me.getExpenses().values()){
+				if(e.getMembersPaidFor().contains(memberid)){					//I paid member
+					amount += e.getAmount()/e.getMembersPaidFor().size(); 
+				}
 			}
-		}
 		return amount;
 	}
 

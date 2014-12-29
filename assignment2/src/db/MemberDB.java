@@ -34,6 +34,12 @@ public class MemberDB {
 		}
 	}
 	
+	public void addMembers(Map<Integer, Member> members) {
+		for(Member m : members.values()){
+			this.members.put(m.getId(), m);
+		}
+	}	
+	
 	public boolean deleteMember(Member member){
 		if(member == null){
 			return false;
@@ -57,7 +63,7 @@ public class MemberDB {
 	
 	public void setMembers(Map<Integer, Member> members) {
 		this.members = members;
-	}	
+	}
 	
 	
 }

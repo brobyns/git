@@ -3,7 +3,8 @@ package model;
 import java.util.Set;
 
 public class Expense {
-	private static int id = 0; 
+	private static int counter = 0;
+	private int id;
 	private int senderId, groupId;
 	private double amount;
 	private String type, description;
@@ -11,7 +12,8 @@ public class Expense {
 	private Set<Integer> membersPaidFor;
 
 	public Expense(int senderId, double amount, String date, String description, int groupId){
-		id++;
+		counter++;
+		id = counter;
 		setId(id);
 		setSenderId(senderId);
 		setAmount(amount);
