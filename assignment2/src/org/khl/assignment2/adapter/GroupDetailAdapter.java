@@ -1,7 +1,10 @@
 package org.khl.assignment2.adapter;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import model.Expense;
 import model.Member;
 import model.Facade.Facade;
 
@@ -10,10 +13,12 @@ import org.khl.assignment2.R;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class GroupDetailAdapter extends BaseAdapter {
@@ -22,13 +27,15 @@ public class GroupDetailAdapter extends BaseAdapter {
 	private List<Member> members;
 	private static LayoutInflater inflater=null;
 	private Facade facade;
+	private int groupId;
 	//		public ImageLoader imageLoader; 
 
-	public GroupDetailAdapter(Activity a, List<Member> members, Facade facade) {
+	public GroupDetailAdapter(Activity a, List<Member> members, Facade facade, int groupId) {
 		activity = a;
 		this.members=members;
 		this.facade = facade;
 		inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.groupId = groupId;
 		//			imageLoader=new ImageLoader(activity.getApplicationContext());
 	}
 
@@ -36,7 +43,7 @@ public class GroupDetailAdapter extends BaseAdapter {
 		return members.size();
 	}
 
-	public Object getItem(int position) {
+	public Member getItem(int position) {
 		return members.get(position);
 	}
 
@@ -51,26 +58,39 @@ public class GroupDetailAdapter extends BaseAdapter {
 		}
 		TextView memberName = (TextView)view.findViewById(R.id.memberName); // member
 		TextView amountText = (TextView)view.findViewById(R.id.amount); // who owes who how much
+		ImageView image = (ImageView)view.findViewById(R.id.list_image);
 
 		// Setting all values in listview
-			Member m = members.get(position);
+			Member m = getItem(position);
 			memberName.setText(m.toString());
-			double amount = facade.getAmount(m.getId());
+			Log.v("bram","id in adapter: "+ m.getId());
+			Map<Integer, Double> amountsPaid = facade.getAmountsPaid(m.getId());
+			Map<Integer, Double> amountsReceived = facade.getAmountsReceived(m.getId(), facade.getGroups().get(groupId));
 			String amountString ="";
-			if(amount > 0){
-				amountString = "owes you "+ amount;
-				amountText.setTextColor(Color.GREEN);
-			}else if(amount < 0){
-				amount *= -1;
-				amountString = "you owe " + amount;
-				amountText.setTextColor(Color.RED);
-			}else{
-				amountString = "settled";
+			for(Entry e : amountsPaid.entrySet()){
+				amountString += createAmountString(facade.getMembers().get((Integer)e.getKey()).toString(), (Double)e.getValue());
+			}
+			for(Entry e : amountsReceived.entrySet()){
+				amountString += createAmountString(facade.getMembers().get((Integer)e.getKey()).toString(), (Double)e.getValue());
 			}
 			amountText.setText(amountString);
-		//song.get(CustomizedListView.KEY_ARTIST));
-		//members.setText(song.get(CustomizedListView.KEY_DURATION));
+			//image.setImageBitmap(m.getExpenses().get(2).getPhoto());
 		//imageLoader.DisplayImage(song.get(CustomizedListView.KEY_THUMB_URL), thumb_image);
 		return view;
+	}
+	
+	private String createAmountString(String name, double amount){
+		String amountString ="";
+		if(amount > 0){
+			amountString = name + " owes you "+ amount;
+		//	amountText.setTextColor(Color.GREEN);
+		}else if(amount < 0){
+			amount *= -1;
+			amountString = "You owe "+ name + amount;
+		//	amountText.setTextColor(Color.RED);
+		}else{
+			amountString = "settled";
+		}
+		return amountString;
 	}
 }

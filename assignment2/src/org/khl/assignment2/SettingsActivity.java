@@ -1,10 +1,10 @@
 package org.khl.assignment2;
 
+import db.MemberDB;
 import model.Member;
 import model.Settings;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
-
 import service.FetchData;
 import service.Validator;
 import android.app.Activity;
@@ -21,12 +21,12 @@ import android.widget.AdapterView.OnItemSelectedListener;
 public class SettingsActivity extends Activity implements OnItemSelectedListener {
 	private Facade facade;
 	private FetchData fetchData;
-	private Settings settings;
 	private Spinner spinner;
 	private EditText firstname, lastname, email;
 	private String[] currencies = {"EUR", "GBP", "USD"};
 	private String currency;
 	private Context context;
+	private Settings settings;
 	
 	
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +65,9 @@ public class SettingsActivity extends Activity implements OnItemSelectedListener
 		Member member = new Member(firstname.getText().toString(),lastname.getText().toString(),
 							email.getText().toString());
 		settings = Settings.getInstance();
+		if(settings.getCurrentMember() == null){
+			facade.createMember(member);
+		}
 		settings.setCurrentMember(member);
 		settings.setCurrency(currency);
 		facade.writeSettings(context, settings);

@@ -3,6 +3,8 @@ package model;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.util.Log;
+
 public class Member{
 	private static int counter = 0;
 	private int id;
@@ -29,6 +31,11 @@ public class Member{
 		setFirstName(firstName);
 		setLastName(lastName);
 		setEmail(email);
+	}
+	
+	public Member(String firstName, String lastName, String email, Map<Integer, Expense> expenses){
+		this(firstName, lastName, email);
+		setExpenses(expenses);
 	}
 
 	public int getId() {
@@ -62,6 +69,7 @@ public class Member{
 	
 	public void addExpense(Expense expense) {
 		expenses.put(expense.getId(), expense);
+		Log.v("bram", "expense added");
 	}
 	
 	public void setExpenses(Map<Integer, Expense> expenses){

@@ -52,8 +52,10 @@ public class MemberDetailAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		Log.v("test", "pos" + position);
 		View view = convertView;
-		
+		//Log.v("Mi", facade.get)
+		Log.v("mi", facade.getMemberForId(memberid).getFirstName() + "");
 		
 		if(convertView==null){
 			view = inflater.inflate(R.layout.group_detail_row, null);

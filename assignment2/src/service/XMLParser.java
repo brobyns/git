@@ -87,7 +87,7 @@ public class XMLParser {
 			} else if (name.equals("groupname")) {
 				groupname = readStringValue(parser, "groupname");
 			}else if (name.equals("members")) {
-				members.add(readMember(parser));
+				//members.add(readMember(parser));
 			} else {
 				skip(parser);
 			}	
@@ -128,6 +128,7 @@ public class XMLParser {
 			String name = parser.getName();
 			if (name.equals("memberid")) {
 				id = readId(parser, "memberid");
+				Log.v("id", id + "");
 			} else if (name.equals("firstname")) {
 				firstname = readStringValue(parser, "firstname");
 			} else if(name.equals("lastname")){
@@ -140,6 +141,7 @@ public class XMLParser {
 				skip(parser);
 			}	
 		}
+		Log.v("bram", id+ " " + firstname +" "+ lastname + " " + email);
 		return new Member(id, firstname, lastname, email, expenses);
 	}
 	

@@ -1,5 +1,6 @@
 package db;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,7 +20,8 @@ import model.Group;
 import model.Member;
 import model.Settings;
 import model.observer.Observer;
-
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.StrictMode;
 import android.util.Log;
 
@@ -129,7 +131,10 @@ public class OnlineDBWriter implements DBWriter {
 			ResultSet set = statement.executeQuery();
 
 			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				members.put(set.getInt(1), new Member(set.getInt(1), set.getString(2), set.getString(3), set.getString(4), getExpensesOfMember(set.getInt(1))));
+				Member m = new Member(set.getString(2), set.getString(3), set.getString(4)); 
+				Map<Integer, Expense> expenses = getExpensesOfMember(m.getId());
+				m.setExpenses(expenses);
+				members.put(m.getId(), m);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -156,6 +161,21 @@ public class OnlineDBWriter implements DBWriter {
 		}
 		return group;
 	}
+	
+	public Member getMemberForId(int id){
+		Member member = null;
+		try {
+			statement = connection.prepareStatement("SELECT firstname, lastname, email FROM member WHERE id= ?");
+			statement.setInt(1, id);
+			ResultSet set = statement.executeQuery();
+			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
+				member = new Member(set.getString(1), set.getString(2), set.getString(3));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return member;
+	}
 
 	private Group getGroupForName(String name){
 		Group group = null;
@@ -181,7 +201,7 @@ public class OnlineDBWriter implements DBWriter {
 			ResultSet set = statement.executeQuery();
 
 			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				members.add(new Member(set.getInt(1), set.getString(2), set.getString(3), set.getString(4)));
+				members.add(new Member(memberDB.getIdForEmail(set.getString(4)),set.getString(2), set.getString(3), set.getString(4),getExpensesOfMember(set.getInt(1))));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -218,19 +238,63 @@ public class OnlineDBWriter implements DBWriter {
 			e.printStackTrace();
 		}
 	}
+	
+	private byte[] compressImage(Bitmap bmp){
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+		return stream.toByteArray();
+	}
 
+	private int getMemberIdForEmail(String email){
+		int memberId = -1;
+		try {
+			statement = connection.prepareStatement("SELECT id FROM member WHERE email = ?");
+			statement.setString(1, email);
+			ResultSet set = statement.executeQuery();
+
+			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
+				memberId = set.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return memberId;
+	}
+	
+	private int getGroupIdForName(String groupName){
+		int groupId = -1;
+		try {
+			statement = connection.prepareStatement("SELECT id FROM groups WHERE groupname = ?");
+			statement.setString(1, groupName);
+			ResultSet set = statement.executeQuery();
+
+			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
+				groupId = set.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return groupId;
+	}
+	
 	@Override
 	public void writeExpense(Expense expense, List<Member> recipients){
-		int senderid = getIdCurrentMember();
+		int senderid = getMemberIdForEmail(expense.getSender().getEmail());
+		int groupid = getGroupIdForName(groupDB.getGroups().get(expense.getGroupId()).getName());
 		try {
-			statement = connection.prepareStatement("INSERT INTO expense (senderid, amount, expensedate, description, groupid) VALUES(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+			statement = connection.prepareStatement("INSERT INTO expense (senderid, amount, expensedate, description, groupid, image) VALUES(?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 			statement.setInt(1, senderid);
 			statement.setDouble(2, expense.getAmount());
 			statement.setString(3, expense.getDate());
 			statement.setString(4, expense.getDescription());
-			statement.setInt(5, expense.getGroupId());
+			statement.setInt(5, groupid);
+			if (expense.getPhoto() != null){
+			Log.v("bytea", compressImage(expense.getPhoto()) + "");
+			statement.setBytes(6, compressImage(expense.getPhoto()));
+			}else{
+				statement.setNull(6, java.sql.Types.BINARY);
+			}
 			statement.executeUpdate();
-			memberDB.getCurrMember().addExpense(expense);
 			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -239,14 +303,15 @@ public class OnlineDBWriter implements DBWriter {
 		try {
 			set = statement.getGeneratedKeys();
 			if(set.next()){
-				writeExpenseReceivers(set.getInt(1), recipients);
+				expense.setId(set.getInt(1));
+				writeExpenseReceivers(expense, recipients);
 			}
 			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public void writeExpenses(List<Expense> expenses){
 		Map<Integer,Member> membersMap = getMembers();
 		ArrayList<Member> members = new ArrayList<Member>();
@@ -258,14 +323,17 @@ public class OnlineDBWriter implements DBWriter {
 		}
 	}
 
-	private void writeExpenseReceivers(int expenseid, List<Member> recipients) {
+	private void writeExpenseReceivers(Expense expense, List<Member> recipients) {
 		try {
 			for(int i = 0; i < recipients.size(); i++){
+				int memberId = getMemberIdForEmail(recipients.get(i).getEmail());
 				statement = connection.prepareStatement("INSERT INTO expense_receiver (expenseid, receiverid) VALUES(?,?)");
-				statement.setInt(1, expenseid);
-				statement.setInt(2, recipients.get(i).getId());
+				statement.setInt(1, expense.getId());
+				statement.setInt(2, memberId);
 				statement.executeUpdate();
+				expense.addRecipient(recipients.get(i).getId());
 			}
+			memberDB.getMembers().get(expense.getSender().getId()).addExpense(expense);
 			notifyObservers();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -281,11 +349,13 @@ public class OnlineDBWriter implements DBWriter {
 	private Set<Integer> getExpenseReceivers(int expenseid){
 		Set<Integer> receivers = new HashSet<Integer>();
 		try {
-			statement = connection.prepareStatement("SELECT receiverid FROM expense_receiver WHERE expenseid ='" + expenseid +"'");
+			statement = connection.prepareStatement("SELECT receiverid FROM expense_receiver WHERE expenseid = ?"); 
+			statement.setInt(1,expenseid);
 			ResultSet set = statement.executeQuery();
 
 			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				receivers.add(Integer.valueOf((set.getInt(1))));
+				Member m = getMemberForId(set.getInt(1));
+				receivers.add(m.getId());
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -300,6 +370,7 @@ public class OnlineDBWriter implements DBWriter {
 	}
 
 	public void updateGroup(int groupid, String groupname, List<Member> members){
+		int id = getGroupIdForName(groupDB.getGroups().get(groupid).getName());
 		try {
 			statement = connection.prepareStatement ("UPDATE groups SET groupname = '" + groupname + "' WHERE id='"+ groupid + "'");
 			statement.executeUpdate();
@@ -308,7 +379,7 @@ public class OnlineDBWriter implements DBWriter {
 			e.printStackTrace();
 		}
 		try {
-			updateGroupMembers(groupid, members);
+			updateGroupMembers(id, members);
 			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -321,10 +392,11 @@ public class OnlineDBWriter implements DBWriter {
 			statement = connection.prepareStatement("DELETE FROM group_member WHERE groupid='" + groupid + "'");
 			statement.executeUpdate();
 			for(int i = 0; i < members.size(); i++){
+				int memberid = getMemberIdForEmail(members.get(i).getEmail());
 				statement = connection.prepareStatement("INSERT INTO group_member (groupid, memberid) VALUES(?,?)");
 				statement.setInt(1, groupid);
-				statement.setInt(2, members.get(i).getId());
-				statement.executeUpdate();	
+				statement.setInt(2, memberid);
+				statement.executeUpdate();
 			}
 			notifyObservers();
 		} catch (SQLException e) {
@@ -345,7 +417,7 @@ public class OnlineDBWriter implements DBWriter {
 				statement = connection.prepareStatement("INSERT INTO groups (groupname) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
 				statement.setString(1, group.getName());
 				statement.executeUpdate();
-				groupDB.addGroup(group);	
+				groupDB.addGroup(group);
 			}
 			notifyObservers();
 		} catch (SQLException e) {
@@ -362,7 +434,7 @@ public class OnlineDBWriter implements DBWriter {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public void writeGroups(List<Group> groups){
 		for(Group g : groups){
 			writeGroup(g);
@@ -372,10 +444,11 @@ public class OnlineDBWriter implements DBWriter {
 	private void writeGroupMembers(int groupid, List<Member> members){
 		try {
 			for(int i = 0; i < members.size(); i++){
+				int memberid = getMemberIdForEmail(members.get(i).getEmail());
 				statement = connection.prepareStatement("INSERT INTO group_member (groupid, memberid) VALUES(?,?)");
 				statement.setInt(1, groupid);
-				statement.setInt(2, members.get(i).getId());
-				statement.executeUpdate();	
+				statement.setInt(2, memberid);
+				statement.executeUpdate();
 			}
 			notifyObservers();
 		} catch (SQLException e) {
@@ -388,15 +461,24 @@ public class OnlineDBWriter implements DBWriter {
 			}
 		}
 	}
+	
+	public Bitmap decompressByteArray (byte[] bytea){
+		Bitmap bitmap = BitmapFactory.decodeByteArray(bytea, 0, bytea.length);
+		return bitmap;
+	}
 
 	public Map<Integer, Expense> getExpensesOfMember(int memberid){
 		Map<Integer, Expense> expenses = new HashMap<Integer, Expense>();
 		try {
-			statement = connection.prepareStatement("SELECT expense.id, senderid, amount, expensedate, description, groupid FROM expense WHERE senderid ='" + memberid +"'");
+			statement = connection.prepareStatement("SELECT expense.id, senderid, amount, expensedate, description, groupid, image FROM expense WHERE senderid ='" + memberid +"'");
 			ResultSet set = statement.executeQuery();
-
+			
 			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				expenses.put(set.getInt(1), new Expense(set.getInt(1), set.getInt(2),set.getDouble(3), set.getString(4), set.getString(5), getExpenseReceivers(set.getInt(1)), set.getInt(6)));
+				if(set.getBytes(7)!=null){
+					expenses.put(set.getInt(1), new Expense(memberid,set.getDouble(3), set.getString(4), set.getString(5), getExpenseReceivers(set.getInt(1)), set.getInt(6), decompressByteArray(set.getBytes(7))));
+				}else{
+					expenses.put(set.getInt(1), new Expense(memberid,set.getDouble(3), set.getString(4), set.getString(5), getExpenseReceivers(set.getInt(1)), set.getInt(6)));
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -431,38 +513,7 @@ public class OnlineDBWriter implements DBWriter {
 		}
 		return groups;
 	}
-
-
-
-	@Override
-	public void writeSettings(Settings settings) {
-		try {
-			Member m = settings.getCurrentMember();
-			statement = connection.prepareStatement("INSERT INTO member (firstname, lastname, email) VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS);
-			statement.setString(1, m.getFirstName());
-			statement.setString(2, m.getLastName());
-			statement.setString(3, m.getEmail());
-			statement.executeUpdate();
-			memberDB.addMember(m);
-			ResultSet set = statement.getGeneratedKeys();
-			if(set.next()){		
-				statement = connection.prepareStatement("INSERT INTO settings (id, currency) VALUES(?,?)");
-				statement.setInt(1, set.getInt(1));
-				statement.setString(2, settings.getCurrency());
-				statement.executeUpdate();
-				notifyObservers();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally{
-			try {
-				statement.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
+	
 	private int getIdCurrentMember(){
 		int id=-1;
 		try {
@@ -476,7 +527,7 @@ public class OnlineDBWriter implements DBWriter {
 		}
 		return id;
 	}
-
+	
 	public Settings getSettings() {
 		try {
 			statement = connection.prepareStatement("SELECT * FROM settings");
@@ -501,6 +552,7 @@ public class OnlineDBWriter implements DBWriter {
 		}
 		return settings;
 	}
+	
 
 	@Override
 	public void notifyObservers() {
@@ -511,7 +563,6 @@ public class OnlineDBWriter implements DBWriter {
 
 	@Override
 	public void addObserver(Observer o) {
-		Log.v("bram", "add observer writer");
 		observers.add(o);
 	}
 

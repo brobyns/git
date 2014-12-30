@@ -3,7 +3,6 @@ package org.khl.assignment2;
 import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
-
 import service.FetchData;
 import service.Validator;
 import android.app.Activity;
@@ -41,9 +40,9 @@ public class CreateMemberActivity extends Activity{
 			Member member = new Member(firstname, lastname , email);
 			facade.createMember(member);
 			finish();
-		}else{
-			emailText.setError(getString(R.string.error_email));
-		}
+			}else{
+				emailText.setError(getString(R.string.error_email));
+			}
 	}
 
 	public void cancel(View v){

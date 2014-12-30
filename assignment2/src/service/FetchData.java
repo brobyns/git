@@ -3,6 +3,7 @@ package service;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +50,6 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 	protected void onPreExecute() {
 		super.onPreExecute();
 		String dbWriterType = (checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
-		Log.v("bram", dbWriterType);
 		facade = new FacadeImpl(dbWriterType);
 	}
 
@@ -70,6 +70,7 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 					getXMLData();
 					facade.clearDatabase();
 					ArrayList<Member> membersList = new ArrayList<Member>(memberDB.getMembers().values());
+					facade.writeSettings(context, settings);
 					facade.writeMembers(membersList);
 					facade.writeGroups(new ArrayList<Group>(groupDB.getGroups().values()));
 					for(Member m : membersList){
@@ -124,17 +125,19 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 		Map<Integer, Member> members = new HashMap<Integer, Member>();
 		Map<Integer, Group> groups = new HashMap<Integer, Group>();
 		XMLParser xmlParser = new XMLParser();
-		FileInputStream fin = null;
+		InputStream fin = null;
 		try {
 			fin = context.openFileInput(FILENAME);
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		try {
-			members = xmlParser.parse(fin).get("members");
-			memberDB.addMembers(members);
 			groups = xmlParser.parse(fin).get("groups");
 			groupDB.setGroups(groups);
+			members = xmlParser.parse(fin).get("members");
+			memberDB.addMembers(members);
 		} catch (XmlPullParserException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -147,7 +150,7 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 		FileInputStream fin = null;
 		try {
 			fin = context.openFileInput(SETTINGS);
-		} catch (FileNotFoundException e1) { 
+		} catch (FileNotFoundException e1) {
 			return false;
 		}
 		try {
@@ -159,7 +162,6 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 			facade.writeSettings(context, settings);
 			settingsLoaded = true;
 			memberDB.setCurrMember(member);
-			memberDB.addMember(member);
 			facade.createMember(member);
 		} catch (XmlPullParserException e) {
 			e.printStackTrace();

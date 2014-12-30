@@ -19,7 +19,7 @@ public interface DBWriter extends Subject{
 	void writeExpense(Expense expense, List<Member> recipients);
 	void writeExpenses(List<Expense> expenses);
 	void updateGroup(int groupid, String groupName, List<Member> membersInvited);
+	Member getMemberForId(int id);
 	void clearDatabase();
 	void closeConnection();
-	void writeSettings(Settings settings);
 }

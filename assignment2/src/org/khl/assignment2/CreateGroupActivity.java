@@ -6,7 +6,7 @@ import java.util.List;
 import org.khl.assignment2.adapter.AddedMemberAdapter;
 
 import service.FetchData;
-
+import model.Admin;
 import model.Group;
 import model.Member;
 import model.Facade.Facade;
@@ -110,6 +110,9 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 
 	public void createGroup(View v){
 		Group group = new Group(groupNameField.getText().toString(), membersInvited);
+//		Admin admin = new Admin (facade.getCurrentMember().getId(), facade.getCurrentMember().getFirstName(), facade.getCurrentMember().getLastName(), facade.getCurrentMember().getEmail());
+//		group.setAdmin(admin);
+//		Log.v("admin", group.getAdmin().getFirstName() + "");
 		facade.createGroup(group);
 		finish();
 	}
@@ -128,12 +131,12 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 	public void invite(View v){
 		if(selectedMember != null){
 			membersInvited.add(selectedMember);
-			Log.v("bram", selectedMember.getId()+" "+selectedMember.getFirstName());
 			members.remove(selectedMember);
 			if(members.isEmpty()){
 				selectedMember = null;
 			}
 			refreshData();
+			Log.v("bram", "invite:" + membersInvited.size()+"");
 		}
 	}
 

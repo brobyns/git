@@ -22,5 +22,5 @@ public interface DBFacade {
 	void writeExpenses(List<Expense> expenses);
 	void clearDatabase();
 	void closeConnection();
-	void writeSettings(Settings settings);
+	Member getMemberForId(int id);
 }

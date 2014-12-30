@@ -8,7 +8,6 @@ import model.Group;
 import model.Member;
 import model.Settings;
 import model.Facade.Facade;
-
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;

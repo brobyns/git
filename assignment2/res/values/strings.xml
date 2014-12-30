@@ -27,7 +27,7 @@
 	<string name="placeholder_email">Enter an email address</string>
 	<string name="placeholder_amount">Enter an amount</string>
 	<string name="placeholder_type_expense">Enter a type of expense</string>
-	<string name="placeholder_description">Enter a description (optional)</string>
+	<string name="placeholder_description">Enter a description</string>
 	<string name="error_email">Email address is not valid!</string>
 	<string name="error_alpha">Only alphabetical characters are allowed!</string>
 	<string name="error_amount">Amount is not valid!</string>
@@ -44,6 +44,8 @@
 	<string name="settle_payments">Settle Payments</string>
 	<string name="manage_group">Manage Group</string>
 	<string name="add">Add</string>
+	<string name="sender">Sender: </string>
 	<string name="recipients">Recipients: </string>
 	<string name="no_members">No members yet</string>
+	<string name="take_photo">Add a photo</string>
 </resources>

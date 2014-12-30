@@ -1,4 +1,6 @@
 package model.Facade;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -6,6 +8,7 @@ import android.content.Context;
 import android.util.Log;
 
 import service.StoreData;
+import service.XMLWriter;
 
 import model.Expense;
 import model.Group;
@@ -18,19 +21,19 @@ import db.MemberDB;
 import db.DBFacade;
 import db.DBFacadeImpl;
 
-public class FacadeImpl implements Facade{
+public class FacadeImpl implements Facade {
 	private DBFacade dbFacade;
 	private MemberDB memberDB = MemberDB.getInstance();
 	private GroupDB groupDB = GroupDB.getInstance();
 	private Settings settings = Settings.getInstance();
 	private DBWriter writer;
 
-	public FacadeImpl(String dbWriterType){
+	public FacadeImpl(String dbWriterType) {
 		writer = DBWriterFactory.createDBWriter(dbWriterType);
 		dbFacade = new DBFacadeImpl(writer);
 	}
 
-	public DBWriter getDBWriter(){
+	public DBWriter getDBWriter() {
 		return writer;
 	}
 
@@ -40,7 +43,8 @@ public class FacadeImpl implements Facade{
 	}
 
 	@Override
-	public void updateGroup(int groupId, String groupName, List<Member> membersInvited) {
+	public void updateGroup(int groupId, String groupName,
+			List<Member> membersInvited) {
 		dbFacade.updateGroup(groupId, groupName, membersInvited);
 	}
 
@@ -53,14 +57,17 @@ public class FacadeImpl implements Facade{
 	public Map<Integer, Member> getMembers() {
 		return memberDB.getMembers();
 	}
+	
+	public Member getMemberForId(int id){
+		return dbFacade.getMemberForId(id);
+	}
 
 	@Override
-	public Map<Integer,Member> getMembersOnline() {
+	public Map<Integer, Member> getMembersOnline() {
 		return dbFacade.getMembers();
 	}
 
-
-	public List<Member> getMembersInGroup(int groupId){
+	public List<Member> getMembersInGroup(int groupId) {
 		return groupDB.getMembersInGroup(groupId);
 	}
 
@@ -70,7 +77,7 @@ public class FacadeImpl implements Facade{
 	}
 
 	@Override
-	public Map<Integer,Group> getGroups() {
+	public Map<Integer, Group> getGroups() {
 		return groupDB.getGroups();
 	}
 
@@ -79,37 +86,43 @@ public class FacadeImpl implements Facade{
 		return dbFacade.getGroups();
 	}
 
-	public void writeExpense(Expense expense, List<Member> recipients){
+	public void writeExpense(Expense expense, List<Member> recipients) {
 		dbFacade.writeExpense(expense, recipients);
 	}
 
-	public double getAmountIPaidMember(int memberid){
+	public Map<Integer, Double> getAmountsPaid(int senderId) {
+		Map<Integer, Double> amountMap = new HashMap<Integer, Double>();
 		Map<Integer, Member> members = getMembers();
-		double amount = 0;		
-		Member me = members.get(settings.getCurrentMember().getId());
-			for(Expense e : me.getExpenses().values()){
-				if(e.getMembersPaidFor().contains(memberid)){					//I paid member
-					amount += e.getAmount()/e.getMembersPaidFor().size(); 
+		Member sender = members.get(senderId);
+		for(Member m : members.values())
+		for(Expense e : sender.getExpenses().values()){
+			Log.v("bram", "number: "+e.getMembersPaidFor().size());
+			for(int id : e.getMembersPaidFor()){
+				if(amountMap.containsKey(id)){
+					amountMap.put(id, amountMap.get(id) + (e.getAmount()/e.getMembersPaidFor().size()));
+				}else{
+					amountMap.put(id, e.getAmount()/e.getMembersPaidFor().size());
 				}
 			}
-		return amount;
+		}
+		return amountMap;
 	}
 
-	public double getAmountMemberPaidMe(int memberid){
+	public Map<Integer, Double> getAmountsReceived(int receiverId, Group group) {
+		Map<Integer, Double> amountMap = new HashMap<Integer, Double>();
 		Map<Integer, Member> members = getMembers();
-		double amount = 0;	
-		Member member = members.get(memberid);
-		Member me = members.get(settings.getCurrentMember().getId());
-		for(Expense e : member.getExpenses().values()){
-			if(e.getMembersPaidFor().contains(me.getId())){				//member paid me
-				amount += e.getAmount()/e.getMembersPaidFor().size(); 	
+		for (Member sender : group.getMembers()) {
+			for (Expense e : sender.getExpenses().values()){
+				if(e.getMembersPaidFor().contains(receiverId)) { 
+					if(amountMap.containsKey(sender.getId())){
+						amountMap.put(sender.getId(), amountMap.get(sender.getId()) - (e.getAmount()/e.getMembersPaidFor().size()));
+					}else{
+						amountMap.put(sender.getId(), -e.getAmount()/e.getMembersPaidFor().size());
+					}
+				}
 			}
 		}
-		return amount;
-	}
-
-	public double getAmount(int memberid){
-		return getAmountIPaidMember(memberid)-getAmountMemberPaidMe(memberid);
+		return amountMap;
 	}
 
 	@Override
@@ -117,15 +130,15 @@ public class FacadeImpl implements Facade{
 		dbFacade.clearDatabase();
 	}
 
-	public void writeMembers(List<Member> members){
+	public void writeMembers(List<Member> members) {
 		dbFacade.writeMembers(members);
 	}
 
-	public void writeGroups(List<Group> groups){
+	public void writeGroups(List<Group> groups) {
 		dbFacade.writeGroups(groups);
 	}
 
-	public void writeExpenses(List<Expense> expenses){
+	public void writeExpenses(List<Expense> expenses) {
 		dbFacade.writeExpenses(expenses);
 	}
 
@@ -139,10 +152,8 @@ public class FacadeImpl implements Facade{
 		dbFacade.writeMember(member);
 	}
 
-	@Override
 	public void writeSettings(Context context, Settings settings) {
 		StoreData storeData = new StoreData(context, null, null);
-		dbFacade.writeSettings(settings);
 		storeData.saveSettings(settings);
 	}
 }

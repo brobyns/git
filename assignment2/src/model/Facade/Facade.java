@@ -4,9 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
-
 import db.DBWriter;
-
 import model.Expense;
 import model.Group;
 import model.Member;
@@ -23,9 +21,8 @@ public interface Facade {
 	void createGroup(Group group);
 	void settlePayments();
 	void writeExpense(Expense expense, List<Member> recipients);
-	double getAmountIPaidMember(int memberid);
-	double getAmountMemberPaidMe(int memberid);
-	double getAmount(int id);
+	Map<Integer, Double> getAmountsPaid(int id);
+	Map<Integer, Double> getAmountsReceived(int id, Group group);
 	void updateGroup(int groupId, String string, List<Member> membersInvited);
 	DBWriter getDBWriter();
 	void writeMembers(List<Member> members);
@@ -35,4 +32,5 @@ public interface Facade {
 	boolean checkIfNewDataAvailable();
 	void createMember(Member member);
 	void writeSettings(Context context, Settings settings);
+	Member getMemberForId(int id);
 }

@@ -6,7 +6,6 @@ import db.DBWriter;
 
 import service.FetchData;
 
-import model.Group;
 import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
@@ -47,12 +46,21 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
         initializeComponents();
 		
     }
-
+	@Override
+	protected void onResume(){
+		super.onResume();
+		Log.v("Michael", "resume");
+		//initializeComponents();
+		update();
+	}
+	
 	private void initializeComponents(){
 		memberName = (TextView)findViewById(R.id.memberName);
 		listView = (ListView)findViewById(android.R.id.list);
-		Log.v("bram", facade.getGroups().size()+"");
-		detailAdapt=new GroupDetailAdapter(this, facade.getGroups().get(groupid).getMembers(), facade);
+		for(Member m : facade.getGroups().get(groupid).getMembers()){
+			Log.v("bram", "in group: "+m.getId());
+		}
+		detailAdapt=new GroupDetailAdapter(this, facade.getGroups().get(groupid).getMembers(), facade, groupid);
 		listView.setAdapter(detailAdapt);
 		listView.setOnItemClickListener(this);
 	}
@@ -104,7 +112,6 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
 	
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-		//Log.v("bram", "memberDetail "+ pos);
 		Member member = (Member) parent.getItemAtPosition(pos);
 		Intent intent = new Intent(GroupDetailActivity.this, MemberDetailActivity.class);
 		intent.putExtra(MEMBER_ID, member.getId());
@@ -113,7 +120,7 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
 
 	@Override
 	public void update() {
-		detailAdapt=new GroupDetailAdapter(this, facade.getGroups().get(groupid).getMembers(), facade);
+		detailAdapt=new GroupDetailAdapter(this, facade.getGroups().get(groupid).getMembers(), facade, groupid);
 		detailAdapt.notifyDataSetChanged();
 		listView.setAdapter(detailAdapt);
 	}

@@ -53,6 +53,9 @@ public class GroupOverviewAdapter extends BaseAdapter {
 
 
 		groupName.setText(groups.get(position).getName());
+		/*if (!groups.get(position).getAdmin().getFirstName().equals(null)){
+			adminName.setText(groups.get(position).getAdmin().getFirstName());*/
+		
 		List<Member> membersInGroup = groups.get(position).getMembers();
 		if(!membersInGroup.isEmpty()){
 			String names="";

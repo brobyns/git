@@ -31,9 +31,12 @@ public class OfflineDBWriter implements DBWriter {
 		//NOTHING
 	}
 	
+	
 	@Override
 	public void writeMember(Member member) {
+		Log.v("bram", memberDB.getMembers().size()+"");
 		memberDB.addMember(member);
+		Log.v("bram", memberDB.getMembers().size()+"");
 		notifyObservers();
 	}
 
@@ -70,7 +73,6 @@ public class OfflineDBWriter implements DBWriter {
 
 	@Override
 	public void addObserver(Observer o) {
-		Log.v("bram", "add observer writer offline");
 		observers.add(o);
 	}
 
@@ -79,14 +81,16 @@ public class OfflineDBWriter implements DBWriter {
 
 	@Override
 	public void writeMembers(List<Member> members) {
-		// TODO Auto-generated method stub
-		
+		for(Member m : members){
+			memberDB.addMember(m);
+		}
 	}
 
 	@Override
 	public void writeGroups(List<Group> groups) {
-		// TODO Auto-generated method stub
-		
+		for(Group g : groups){
+			groupDB.addGroup(g);
+		}
 	}
 
 	@Override
@@ -100,7 +104,7 @@ public class OfflineDBWriter implements DBWriter {
 	}
 
 	@Override
-	public void writeSettings(Settings settings) {
-		// TODO Auto-generated method stub
+	public Member getMemberForId(int id) {
+		return memberDB.getMembers().get(id);
 	}
 }

@@ -1,23 +1,31 @@
 package org.khl.assignment2;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.khl.assignment2.adapter.GroupOverviewAdapter;
 
 import db.DBWriter;
 
+import service.AssetsPropertyReader;
 import service.FetchData;
 import service.StoreData;
+import service.XMLParser;
+import service.XMLWriter;
 
 import model.Group;
 import model.Member;
+import model.Settings;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
 import model.observer.Observer;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -52,6 +60,12 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 		facade = new FacadeImpl(dbWriterType);
 		dbWriter = facade.getDBWriter();
 		dbWriter.addObserver(this);
+		initializeComponents();
+	}
+	
+	@Override
+	protected void onResume(){
+		super.onResume();
 		initializeComponents();
 	}
 
@@ -122,6 +136,5 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 	@Override
 	public void update() {
 		setAdapter();
-		Log.v("bram", "update");
 	}
 }

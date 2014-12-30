@@ -5,16 +5,16 @@
 		    <groupid>10</groupid>
 			<groupname>Group001</groupname>
 			<members>
-				<memberid></memberid>
+				<memberid>2</memberid>
 			</members>	
 		</group>
 	</groups>
 	<members>
 		<member>
-			<memberid></memberid>
-			<firstname></firstname>
-			<lastname></lastname>
-			<email></email>
+			<memberid>2</memberid>
+			<firstname>John</firstname>
+			<lastname>Doe</lastname>
+			<email>John@outlook.com</email>
 			<expenses>
 				<expense>
 			    	<expenseid></expenseid>

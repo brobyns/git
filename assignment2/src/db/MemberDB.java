@@ -40,6 +40,7 @@ public class MemberDB {
 		}
 	}	
 	
+	
 	public boolean deleteMember(Member member){
 		if(member == null){
 			return false;
@@ -63,6 +64,15 @@ public class MemberDB {
 	
 	public void setMembers(Map<Integer, Member> members) {
 		this.members = members;
+	}	
+	
+	public int getIdForEmail(String email){
+		for(Member m : members.values()){
+			if(m.getEmail().equalsIgnoreCase(email)){
+				return m.getId();
+			}
+		}
+		return -1;
 	}
 	
 	
