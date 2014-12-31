@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import model.Expense;
+import model.Group;
 import model.Member;
 import model.Facade.Facade;
 
@@ -62,10 +63,11 @@ public class GroupDetailAdapter extends BaseAdapter {
 
 		// Setting all values in listview
 			Member m = getItem(position);
+			Group group = facade.getGroups().get(groupId);
 			memberName.setText(m.toString());
 			Log.v("bram","id in adapter: "+ m.getId());
-			Map<Integer, Double> amountsPaid = facade.getAmountsPaid(m.getId());
-			Map<Integer, Double> amountsReceived = facade.getAmountsReceived(m.getId(), facade.getGroups().get(groupId));
+			Map<Integer, Double> amountsPaid = facade.getAmountsPaid(m.getId(), group);
+			Map<Integer, Double> amountsReceived = facade.getAmountsReceived(m.getId(), group);
 			String amountString ="";
 			for(Entry e : amountsPaid.entrySet()){
 				amountString += createAmountString(facade.getMembers().get((Integer)e.getKey()).toString(), (Double)e.getValue());
@@ -82,14 +84,12 @@ public class GroupDetailAdapter extends BaseAdapter {
 	private String createAmountString(String name, double amount){
 		String amountString ="";
 		if(amount > 0){
-			amountString = name + " owes you "+ amount;
+			amountString = name + " owes you "+ amount+" "+facade.getCurrency()+" \n";
 		//	amountText.setTextColor(Color.GREEN);
 		}else if(amount < 0){
 			amount *= -1;
-			amountString = "You owe "+ name + amount;
+			amountString = "You owe "+ name +" "+ amount+" "+ facade.getCurrency()+"\n";
 		//	amountText.setTextColor(Color.RED);
-		}else{
-			amountString = "settled";
 		}
 		return amountString;
 	}

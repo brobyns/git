@@ -44,22 +44,17 @@ public class GroupDetailActivity extends ListActivity implements OnItemClickList
 		dbWriter = facade.getDBWriter();
 		dbWriter.addObserver(this);
         initializeComponents();
-		
     }
+	
 	@Override
 	protected void onResume(){
 		super.onResume();
-		Log.v("Michael", "resume");
-		//initializeComponents();
 		update();
 	}
 	
 	private void initializeComponents(){
 		memberName = (TextView)findViewById(R.id.memberName);
 		listView = (ListView)findViewById(android.R.id.list);
-		for(Member m : facade.getGroups().get(groupid).getMembers()){
-			Log.v("bram", "in group: "+m.getId());
-		}
 		detailAdapt=new GroupDetailAdapter(this, facade.getGroups().get(groupid).getMembers(), facade, groupid);
 		listView.setAdapter(detailAdapt);
 		listView.setOnItemClickListener(this);

@@ -131,9 +131,7 @@ public class OnlineDBWriter implements DBWriter {
 			ResultSet set = statement.executeQuery();
 
 			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				Member m = new Member(set.getString(2), set.getString(3), set.getString(4)); 
-				Map<Integer, Expense> expenses = getExpensesOfMember(m.getId());
-				m.setExpenses(expenses);
+				Member m = new Member(set.getString(2), set.getString(3), set.getString(4));
 				members.put(m.getId(), m);
 			}
 		} catch (SQLException e) {
@@ -169,7 +167,8 @@ public class OnlineDBWriter implements DBWriter {
 			statement.setInt(1, id);
 			ResultSet set = statement.executeQuery();
 			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				member = new Member(set.getString(1), set.getString(2), set.getString(3));
+				//member = new Member(set.getString(1), set.getString(2), set.getString(3));
+				member = memberDB.getMembers().get(memberDB.getIdForEmail(set.getString(3)));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -201,7 +200,10 @@ public class OnlineDBWriter implements DBWriter {
 			ResultSet set = statement.executeQuery();
 
 			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
-				members.add(new Member(memberDB.getIdForEmail(set.getString(4)),set.getString(2), set.getString(3), set.getString(4),getExpensesOfMember(set.getInt(1))));
+				Member m = new Member(memberDB.getIdForEmail(set.getString(4)),set.getString(2), set.getString(3), set.getString(4));
+				Map<Integer,Expense> expenses = getExpensesOfMember(set.getInt(1), m);
+				m.setExpenses(expenses);
+				members.add(m);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -354,7 +356,10 @@ public class OnlineDBWriter implements DBWriter {
 			ResultSet set = statement.executeQuery();
 
 			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
+				Log.v("bram", memberDB.getMembers().size()+"");
+				Log.v("bram", set.getInt(1)+"");
 				Member m = getMemberForId(set.getInt(1));
+				
 				receivers.add(m.getId());
 			}
 		} catch (SQLException e) {
@@ -467,17 +472,18 @@ public class OnlineDBWriter implements DBWriter {
 		return bitmap;
 	}
 
-	public Map<Integer, Expense> getExpensesOfMember(int memberid){
+	public Map<Integer, Expense> getExpensesOfMember(int memberid, Member m){
 		Map<Integer, Expense> expenses = new HashMap<Integer, Expense>();
+		int senderId = memberDB.getIdForEmail(m.getEmail());
 		try {
 			statement = connection.prepareStatement("SELECT expense.id, senderid, amount, expensedate, description, groupid, image FROM expense WHERE senderid ='" + memberid +"'");
 			ResultSet set = statement.executeQuery();
 			
 			for(@SuppressWarnings("unused")int i = 0; set.next(); i++) {
 				if(set.getBytes(7)!=null){
-					expenses.put(set.getInt(1), new Expense(memberid,set.getDouble(3), set.getString(4), set.getString(5), getExpenseReceivers(set.getInt(1)), set.getInt(6), decompressByteArray(set.getBytes(7))));
+					expenses.put(set.getInt(1), new Expense(senderId,set.getDouble(3), set.getString(4), set.getString(5), getExpenseReceivers(set.getInt(1)), set.getInt(6), decompressByteArray(set.getBytes(7))));
 				}else{
-					expenses.put(set.getInt(1), new Expense(memberid,set.getDouble(3), set.getString(4), set.getString(5), getExpenseReceivers(set.getInt(1)), set.getInt(6)));
+					expenses.put(set.getInt(1), new Expense(senderId,set.getDouble(3), set.getString(4), set.getString(5), getExpenseReceivers(set.getInt(1)), set.getInt(6)));
 				}
 			}
 		} catch (SQLException e) {

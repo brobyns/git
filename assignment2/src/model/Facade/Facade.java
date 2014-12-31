@@ -21,7 +21,7 @@ public interface Facade {
 	void createGroup(Group group);
 	void settlePayments();
 	void writeExpense(Expense expense, List<Member> recipients);
-	Map<Integer, Double> getAmountsPaid(int id);
+	Map<Integer, Double> getAmountsPaid(int id, Group group);
 	Map<Integer, Double> getAmountsReceived(int id, Group group);
 	void updateGroup(int groupId, String string, List<Member> membersInvited);
 	DBWriter getDBWriter();
@@ -33,4 +33,5 @@ public interface Facade {
 	void createMember(Member member);
 	void writeSettings(Context context, Settings settings);
 	Member getMemberForId(int id);
+	String getCurrency();
 }
