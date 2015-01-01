@@ -1,6 +1,8 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import android.util.Log;
@@ -65,6 +67,16 @@ public class Member{
 	
 	public Map<Integer, Expense> getExpenses(){
 		return expenses;
+	}
+	
+	public List<Expense> getExpensesForGroup(int groupId){
+		ArrayList<Expense> expensesForGroup = new ArrayList<Expense>();
+		for(Expense e : expenses.values()){
+			if(e.getGroupId() == groupId){
+				expensesForGroup.add(e);
+			}
+		}
+		return expensesForGroup;
 	}
 	
 	public void addExpense(Expense expense) {

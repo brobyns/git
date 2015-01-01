@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 public class AddExpenseActivity extends Activity implements OnItemSelectedListener {
 	private Facade facade;
@@ -37,9 +38,9 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 	private FetchData fetchData;
 	private SpinnerListener spinnerListener;
 	private Spinner spinnerSend, spinnerReceive;
-	private ArrayAdapter<Member> memberAdapt;
+	private ArrayAdapter<Member> senderAdapt, receiverAdapt;
 	private AddedMemberAdapter addedMemberAdapt;
-	private List<Member> members;
+	private List<Member> members, receivers;
 	private List<Member> recipients = new ArrayList<Member>();
 	private ListView addMembersList;
 	private ImageView imageview;
@@ -52,47 +53,54 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_expense);
 		Bundle b = getIntent().getExtras();
-        groupid = b.getInt(GroupDetailActivity.GROUP_ID);
+		groupid = b.getInt(GroupDetailActivity.GROUP_ID);
 		fetchData = new FetchData(this.getApplicationContext());
 		String dbWriterType = (fetchData.checkIfConnected()? "OnlineDBWriter": "OfflineDBWriter");
 		facade = new FacadeImpl(dbWriterType);
 		members = new ArrayList<Member>(facade.getMembersInGroup(groupid));
 		initializeComponents();
 	}
-	
+
 
 	private void initializeComponents(){
 		members = new ArrayList<Member>(facade.getGroups().get(groupid).getMembers());
-		members.remove(facade.getCurrentMember());
+//		members.remove(facade.getCurrentMember());
+		receivers = members;
 		description = (EditText)findViewById(R.id.description);
 		amountText = (EditText)findViewById(R.id.amount);
 		spinnerSend = (Spinner) findViewById(R.id.spinner_send);
 		spinnerReceive = (Spinner) findViewById(R.id.spinner_receive);
 		imageview = (ImageView) findViewById(R.id.imageView1);
-		memberAdapt = new ArrayAdapter<Member>(this,  android.R.layout.simple_spinner_item, members);
-		memberAdapt.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spinnerSend.setAdapter(memberAdapt);
+		senderAdapt = new ArrayAdapter<Member>(this,  android.R.layout.simple_spinner_item, members);
+		senderAdapt.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinnerSend.setAdapter(senderAdapt);
 		spinnerListener = new SpinnerListener(this);
 		spinnerSend.setOnItemSelectedListener(spinnerListener);
-		spinnerReceive.setAdapter(memberAdapt);
+		receiverAdapt = new ArrayAdapter<Member>(this,  android.R.layout.simple_spinner_item, receivers);
+		receiverAdapt.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinnerReceive.setAdapter(receiverAdapt);
 		spinnerReceive.setOnItemSelectedListener(this);
-		addedMemberAdapt = new AddedMemberAdapter(this,recipients, memberAdapt, members, spinnerReceive);
+		addedMemberAdapt = new AddedMemberAdapter(this,recipients, receiverAdapt, receivers, spinnerReceive);
 		addMembersList = (ListView)findViewById(android.R.id.list);
 		addMembersList.setAdapter(addedMemberAdapt);
 	}
 
 	public void addExpense(View v){
-		
-		if(Validator.isValidAmount(amountText.getText().toString())){
-			Double amount = Double.parseDouble(amountText.getText().toString());
-			Expense expense = new Expense(spinnerListener.getSender(), amount, getCurrentDateTime(), description.getText().toString(), groupid, photo);
-			facade.writeExpense(expense, recipients);
-			finish();
+		if(!recipients.isEmpty()){
+			if(Validator.isValidAmount(amountText.getText().toString())){
+				Double amount = Double.parseDouble(amountText.getText().toString());
+				Expense expense = new Expense(spinnerListener.getSender(), amount, getCurrentDateTime(), description.getText().toString(), groupid, photo);
+				facade.writeExpense(expense, recipients);
+				finish();
 			}else{
 				amountText.setError(getString(R.string.error_amount));
 			}
+		}else{
+			Toast.makeText(getApplicationContext(), getString(R.string.error_no_recipient), 
+					   Toast.LENGTH_SHORT).show();
+		}
 	}
-	
+
 	private String getCurrentDateTime(){
 		Calendar c = Calendar.getInstance();
 		SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -105,7 +113,6 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == CAM_REQUEST){
 			photo = (Bitmap) data.getExtras().get("data");
@@ -113,38 +120,36 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 		}
 	}
 
-
 	public void invite(View v){
 		if(selectedMember != null){
 			recipients.add(selectedMember);
-			members.remove(selectedMember);
-			if(members.isEmpty()){
+			receivers.remove(selectedMember);
+			if(receivers.isEmpty()){
 				selectedMember = null;
 			}
 			refreshData();
 		}
 	}
-	
+
 	public void takePhoto(View v){
 		Intent camera = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 		startActivityForResult(camera, CAM_REQUEST);
 	}
-	
+
 	public static void saveToFile(String filename,Bitmap bmp) {
-	      try {
-	          FileOutputStream out = new FileOutputStream(filename);
-	          bmp.compress(CompressFormat.PNG, 100, out);
-	          out.flush();
-	          out.close();
-	      } catch(Exception e) {}
-	  }
+		try {
+			FileOutputStream out = new FileOutputStream(filename);
+			bmp.compress(CompressFormat.PNG, 100, out);
+			out.flush();
+			out.close();
+		} catch(Exception e) {}
+	}
 
 	private void refreshData(){
 		addedMemberAdapt.notifyDataSetChanged();
-		memberAdapt.notifyDataSetChanged();
-		spinnerReceive.setAdapter(memberAdapt);
+		receiverAdapt.notifyDataSetChanged();
+		spinnerReceive.setAdapter(receiverAdapt);
 	}
-
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int pos,
@@ -155,7 +160,5 @@ public class AddExpenseActivity extends Activity implements OnItemSelectedListen
 
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 }

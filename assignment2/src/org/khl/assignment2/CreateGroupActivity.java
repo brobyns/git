@@ -6,7 +6,8 @@ import java.util.List;
 import org.khl.assignment2.adapter.AddedMemberAdapter;
 
 import service.FetchData;
-import model.Admin;
+import service.StoreData;
+import service.Validator;
 import model.Group;
 import model.Member;
 import model.Facade.Facade;
@@ -35,7 +36,7 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 	private Group group;
 	private String groupName;
 	private EditText groupNameField, emailField;
-	private Button createBtn, cancelBtn;
+	private Button createBtn, inviteBtn, cancelBtn;
 	private Spinner spinner;
 	private List<Member> members, membersInvited = new ArrayList<Member>();
 	private ListView addMembersList;
@@ -73,6 +74,7 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 
 	private void initializeComponents(){
 		createBtn = (Button)findViewById(R.id.createBtn);
+		inviteBtn = (Button)findViewById(R.id.inviteBtn);
 		cancelBtn = (Button)findViewById(R.id.cancelBtn);
 		groupsLayout = (LinearLayout)findViewById(R.id.groupsLayout);
 		groupNameField = (EditText)findViewById(R.id.groupName);
@@ -109,25 +111,31 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 	}
 
 	public void createGroup(View v){
-		Group group = new Group(groupNameField.getText().toString(), membersInvited);
-//		Admin admin = new Admin (facade.getCurrentMember().getId(), facade.getCurrentMember().getFirstName(), facade.getCurrentMember().getLastName(), facade.getCurrentMember().getEmail());
-//		group.setAdmin(admin);
-//		Log.v("admin", group.getAdmin().getFirstName() + "");
-		facade.createGroup(group);
-		finish();
+		String groupNameText = groupNameField.getText().toString();
+		if(Validator.isValidLength(groupNameText, 1, 25)){
+			Group group = new Group(groupNameText, membersInvited);
+			facade.createGroup(group);
+			finish();
+		}else{
+			groupNameField.setError(getString(R.string.error_length));
+		}
 	}
-	
+
 	public void updateGroup(){
-		Log.v("bram", membersInvited.size()+"");
-		facade.updateGroup(group.getId(), groupNameField.getText().toString(), membersInvited);
-		finish();
+		String groupNameText = groupNameField.getText().toString();
+		if(Validator.isValidLength(groupNameText, 1, 25)){
+			facade.updateGroup(group.getId(), groupNameText, membersInvited);
+			finish();
+		}else{
+			groupNameField.setError(getString(R.string.error_length));
+		}
 	}
 
 	public void createMember(View v){
 		Intent intent = new Intent(CreateGroupActivity.this, CreateMemberActivity.class);
 		startActivity(intent);
 	}
-	
+
 	public void invite(View v){
 		if(selectedMember != null){
 			membersInvited.add(selectedMember);
@@ -136,7 +144,6 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 				selectedMember = null;
 			}
 			refreshData();
-			Log.v("bram", "invite:" + membersInvited.size()+"");
 		}
 	}
 
@@ -148,6 +155,13 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 
 	public void cancel(View v){
 		finish();
+	}
+	
+	@Override
+	protected void onResume(){
+		super.onResume();
+		Log.v("bram", "resume: "+members.size());
+		update();
 	}
 
 	@Override
@@ -180,10 +194,21 @@ public class CreateGroupActivity extends ListActivity implements OnItemSelectedL
 	public void finish(){
 		super.finish();
 	}
+	
+	@Override
+	 public void onStop() {
+		ArrayList<Group> groups = new ArrayList<Group>(facade.getGroups().values());
+		ArrayList<Member> members = new ArrayList<Member>(facade.getMembers().values());
+		StoreData storeData = new StoreData(this.getApplicationContext(), members, groups);
+		Log.v("bram", "data stored");
+		storeData.execute();
+		super.onStop();
+	 }
 
 	@Override
 	public void update() {
-		members = new ArrayList<Member>(facade.getMembers().values());
+//		members = new ArrayList<Member>(facade.getMembers().values());
+//		members.removeAll(membersInvited);
 		memberAdapt = new ArrayAdapter<Member>(this,  android.R.layout.simple_spinner_item, members);
 		memberAdapt.notifyDataSetChanged();
 		spinner.setAdapter(memberAdapt);

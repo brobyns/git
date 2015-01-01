@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.xmlpull.v1.XmlSerializer;
 
+import db.MemberDB;
+
 import model.Expense;
 import model.Group;
 import model.Member;
@@ -12,6 +14,7 @@ import android.util.Log;
 import android.util.Xml;
 
 public class XMLWriter {
+	private MemberDB memberDB = MemberDB.getInstance();
 
 	public String write(List<Member> members, List<Group> groups) throws IllegalArgumentException, IllegalStateException, IOException {
 		XmlSerializer xmlSerializer = Xml.newSerializer();
@@ -24,7 +27,7 @@ public class XMLWriter {
 		xmlSerializer.endTag("", "database");
 		// end DOCUMENT
 		xmlSerializer.endDocument();
-
+		Log.v("bram", writer.toString());
 		return writer.toString();
 
 	}
@@ -56,20 +59,20 @@ public class XMLWriter {
 	}
 	
 	private void writeGroups(XmlSerializer xmlSerializer, List<Group> groups) throws IllegalArgumentException, IllegalStateException, IOException{	
-	xmlSerializer.startTag("", "groups");
-		for(Group group : groups){
-			xmlSerializer.startTag("", "group");
-				xmlSerializer.startTag("", "groupid");
-					xmlSerializer.text(group.getId()+"");
-				xmlSerializer.endTag("", "groupid");
-				xmlSerializer.startTag("", "groupname");
-					xmlSerializer.text(group.getName());
-				xmlSerializer.endTag("", "groupname");
-				writeMembers(xmlSerializer, group.getMembers());
-			xmlSerializer.endTag("", "group");
+		xmlSerializer.startTag("", "groups");
+			for(Group group : groups){
+				xmlSerializer.startTag("", "group");
+					xmlSerializer.startTag("", "groupid");
+						xmlSerializer.text(group.getId()+"");
+					xmlSerializer.endTag("", "groupid");
+					xmlSerializer.startTag("", "groupname");
+						xmlSerializer.text(group.getName());
+					xmlSerializer.endTag("", "groupname");
+					writeMembers(xmlSerializer, group.getMembers());
+				xmlSerializer.endTag("", "group");
+			}
+			xmlSerializer.endTag("", "groups");
 		}
-		xmlSerializer.endTag("", "groups");
-	}
 	
 	private void writeExpense(XmlSerializer xmlSerializer, Expense expense) throws IllegalArgumentException, IllegalStateException, IOException{
 		xmlSerializer.startTag("", "expense");
@@ -87,9 +90,9 @@ public class XMLWriter {
 			xmlSerializer.endTag("", "description");
 			xmlSerializer.startTag("", "receivers");
 			for(Integer id : expense.getMembersPaidFor()){
-				xmlSerializer.startTag("", "receiverid");
-					xmlSerializer.text(id+"");
-				xmlSerializer.endTag("", "receiverid");
+				xmlSerializer.startTag("", "email");
+					xmlSerializer.text(memberDB.getMembers().get(id).getEmail());
+				xmlSerializer.endTag("", "email");
 			}
 			xmlSerializer.endTag("", "receivers");
 			xmlSerializer.startTag("", "groupid");

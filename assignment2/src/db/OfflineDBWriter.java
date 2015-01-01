@@ -34,9 +34,7 @@ public class OfflineDBWriter implements DBWriter {
 	
 	@Override
 	public void writeMember(Member member) {
-		Log.v("bram", memberDB.getMembers().size()+"");
 		memberDB.addMember(member);
-		Log.v("bram", memberDB.getMembers().size()+"");
 		notifyObservers();
 	}
 
@@ -53,8 +51,16 @@ public class OfflineDBWriter implements DBWriter {
 
 	@Override
 	public void writeExpense(Expense expense, List<Member> recipients) {
-		Member me = memberDB.getMembers().get(settings.getCurrentMember().getId());
-		me.addExpense(expense);
+		int senderId = expense.getSender().getId();
+		for(Member m : recipients){
+			expense.addRecipient(m.getId());
+		}
+		Member sender = memberDB.getMembers().get(senderId);
+		Log.v("bram", "Sender of payment: "+sender.toString());
+		for(int id : expense.getMembersPaidFor()){
+			Log.v("bram", "paid to: " + memberDB.getMembers().get(id));
+		}
+		sender.addExpense(expense);
 		notifyObservers();
 	}
 
@@ -95,7 +101,7 @@ public class OfflineDBWriter implements DBWriter {
 
 	@Override
 	public void writeExpenses(List<Expense> expenses) {
-		// TODO Auto-generated method stub	
+		//
 	}
 
 	@Override

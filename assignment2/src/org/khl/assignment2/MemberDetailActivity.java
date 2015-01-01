@@ -6,14 +6,17 @@ import org.khl.assignment2.adapter.MemberDetailAdapter;
 
 import db.DBWriter;
 import model.Expense;
+import model.Group;
 import model.Member;
 import model.Facade.Facade;
 import model.Facade.FacadeImpl;
 import model.observer.Observer;
 import service.FetchData;
+import service.StoreData;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -106,4 +109,14 @@ public class MemberDetailActivity extends ListActivity implements  OnItemClickLi
 		listView.setAdapter(memberDetailAdapt);
 		
 	}
+	
+	@Override
+	 public void onStop() {
+		ArrayList<Group> groups = new ArrayList<Group>(facade.getGroups().values());
+		ArrayList<Member> members = new ArrayList<Member>(facade.getMembers().values());
+		StoreData storeData = new StoreData(this.getApplicationContext(), members, groups);
+		Log.v("bram", "data stored");
+		storeData.execute();
+		super.onStop();
+	 }
 }

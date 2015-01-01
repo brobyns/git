@@ -72,11 +72,6 @@ public class FacadeImpl implements Facade {
 	}
 
 	@Override
-	public void settlePayments() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public Map<Integer, Group> getGroups() {
 		return groupDB.getGroups();
 	}
@@ -99,16 +94,16 @@ public class FacadeImpl implements Facade {
 				sender = m;
 			}	
 		}
-		Log.v("bram", "sender: " + sender.getId()+ " " +sender.toString());
-		Log.v("bram", "expenses of sender: " +sender.getExpenses().size());
-		for(Expense e : sender.getExpenses().values()){
-			Log.v("bram", "amount: "+e.getAmount()+"");
-			Log.v("bram", "number: "+e.getMembersPaidFor().size()+"");
+//		Log.v("bram", "sender: " + sender.getId()+ " " +sender.toString());
+//		Log.v("bram", "expenses of sender: " +sender.getExpenses().size());
+		for(Expense e : sender.getExpensesForGroup(group.getId())){
+//			Log.v("bram", "amount paid: "+e.getAmount()+"");
+//			Log.v("bram", "number receivers: "+e.getMembersPaidFor().size()+"");
 			for(int id : e.getMembersPaidFor()){
 				if(amountMap.containsKey(id)){
-					amountMap.put(id, amountMap.get(id) + (e.getAmount()/e.getMembersPaidFor().size()));
+					amountMap.put(id, roundOff(amountMap.get(id) + (e.getAmount()/e.getMembersPaidFor().size())));
 				}else{
-					amountMap.put(id, e.getAmount()/e.getMembersPaidFor().size());
+					amountMap.put(id, roundOff(e.getAmount()/e.getMembersPaidFor().size()));
 				}
 			}
 		}
@@ -118,19 +113,24 @@ public class FacadeImpl implements Facade {
 
 	public Map<Integer, Double> getAmountsReceived(int receiverId, Group group) {
 		Map<Integer, Double> amountMap = new HashMap<Integer, Double>();
-		Map<Integer, Member> members = getMembers();
 		for (Member sender : group.getMembers()) {
-			for (Expense e : sender.getExpenses().values()){
+			for (Expense e : sender.getExpensesForGroup(group.getId())){
+				Log.v("bram", "amount paid: "+e.getAmount()+"");
+				Log.v("bram", "number receivers: "+e.getMembersPaidFor().size()+"");
 				if(e.getMembersPaidFor().contains(receiverId)) { 
 					if(amountMap.containsKey(sender.getId())){
-						amountMap.put(sender.getId(), amountMap.get(sender.getId()) - (e.getAmount()/e.getMembersPaidFor().size()));
+						amountMap.put(sender.getId(), roundOff(amountMap.get(sender.getId()) - (e.getAmount()/e.getMembersPaidFor().size())));
 					}else{
-						amountMap.put(sender.getId(), -e.getAmount()/e.getMembersPaidFor().size());
+						amountMap.put(sender.getId(), roundOff(-e.getAmount()/e.getMembersPaidFor().size()));
 					}
 				}
 			}
 		}
 		return amountMap;
+	}
+	
+	private double roundOff(double number){
+		return (double) Math.round(number * 100) / 100;
 	}
 
 	@Override

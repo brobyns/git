@@ -27,8 +27,8 @@ public class SettingsActivity extends Activity implements OnItemSelectedListener
 	private String currency;
 	private Context context;
 	private Settings settings;
-	
-	
+
+
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
@@ -49,35 +49,44 @@ public class SettingsActivity extends Activity implements OnItemSelectedListener
 		spinner.setAdapter(currencyAdapt);
 		spinner.setOnItemSelectedListener(this); 
 	}
-	
+
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int pos,
 			long id) {
-		 currency = (String)parent.getItemAtPosition(pos);
+		currency = (String)parent.getItemAtPosition(pos);
 	}
 
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 	}
-	
+
 	public void save(View v){
-		if(Validator.isValidEmailAddress(email.getText().toString())){
-		Member member = new Member(firstname.getText().toString(),lastname.getText().toString(),
+		if(Validator.isValidLength(firstname.getText().toString(),2,20)){
+			if(Validator.isValidLength(lastname.getText().toString(), 2, 25)){
+				if(Validator.isValidEmailAddress(email.getText().toString())){
+					Member member = new Member(firstname.getText().toString(),lastname.getText().toString(),
 							email.getText().toString());
-		settings = Settings.getInstance();
-		if(settings.getCurrentMember() == null){
-			facade.createMember(member);
-		}
-		settings.setCurrentMember(member);
-		settings.setCurrency(currency);
-		facade.writeSettings(context, settings);
-		Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
-		startActivity(intent);	
+					settings = Settings.getInstance();
+					if(settings.getCurrentMember() == null){
+						facade.createMember(member);
+					}
+					settings.setCurrentMember(member);
+					settings.setCurrency(currency);
+					facade.writeSettings(context, settings);
+					Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
+					startActivity(intent);
+					finish();
+				}else{
+					email.setError(getString(R.string.error_email));
+				}
+			}else{
+				lastname.setError(getString(R.string.error_length));
+			}
 		}else{
-			email.setError(getString(R.string.error_email));
+			firstname.setError(getString(R.string.error_length));
 		}
 	}
-	
+
 	public void cancel(View v){
 		finish();
 	}

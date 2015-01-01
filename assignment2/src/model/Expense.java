@@ -68,6 +68,10 @@ public class Expense {
 	private void setSenderId(int senderId) {
 		this.senderId = senderId;
 	}
+	
+	public int getSenderId(){
+		return senderId;
+	}
 
 	public double getAmount() {
 		return amount;

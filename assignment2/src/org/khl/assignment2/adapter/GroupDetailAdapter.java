@@ -18,8 +18,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class GroupDetailAdapter extends BaseAdapter {
@@ -57,8 +60,9 @@ public class GroupDetailAdapter extends BaseAdapter {
 		if(convertView==null){
 			view = inflater.inflate(R.layout.group_detail_row, null);
 		}
+		LinearLayout amountLayout = (LinearLayout)view.findViewById(R.id.amountLayout);
 		TextView memberName = (TextView)view.findViewById(R.id.memberName); // member
-		TextView amountText = (TextView)view.findViewById(R.id.amount); // who owes who how much
+//		TextView amountText = (TextView)view.findViewById(R.id.amount); // who owes who how much
 		ImageView image = (ImageView)view.findViewById(R.id.list_image);
 
 		// Setting all values in listview
@@ -75,7 +79,13 @@ public class GroupDetailAdapter extends BaseAdapter {
 			for(Entry e : amountsReceived.entrySet()){
 				amountString += createAmountString(facade.getMembers().get((Integer)e.getKey()).toString(), (Double)e.getValue());
 			}
+	//		amountText.setText(amountString);
+			TextView amountText = new TextView(activity);
 			amountText.setText(amountString);
+			amountText.setLayoutParams(new LayoutParams(
+		            LayoutParams.WRAP_CONTENT,
+		            LayoutParams.WRAP_CONTENT));
+			amountLayout.addView(amountText);
 			//image.setImageBitmap(m.getExpenses().get(2).getPhoto());
 		//imageLoader.DisplayImage(song.get(CustomizedListView.KEY_THUMB_URL), thumb_image);
 		return view;

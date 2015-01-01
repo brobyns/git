@@ -19,7 +19,6 @@ public interface Facade {
 	List<Member> getMembersInGroup(int groupid);
 	Map<Integer,Group> getGroupsOnline();
 	void createGroup(Group group);
-	void settlePayments();
 	void writeExpense(Expense expense, List<Member> recipients);
 	Map<Integer, Double> getAmountsPaid(int id, Group group);
 	Map<Integer, Double> getAmountsReceived(int id, Group group);

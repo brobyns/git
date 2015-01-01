@@ -119,11 +119,17 @@ public class MainActivity extends ListActivity implements OnItemClickListener, O
 	}
 
 	public void finish(){
-		ArrayList<Member> members = new ArrayList<Member>(facade.getMembers().values());
-		StoreData storeData = new StoreData(this.getApplicationContext(), members, groups);
-		storeData.execute();
 		super.finish();
 	}
+	
+	 @Override
+	 public void onStop() {
+		ArrayList<Member> members = new ArrayList<Member>(facade.getMembers().values());
+		StoreData storeData = new StoreData(this.getApplicationContext(), members, groups);
+		Log.v("bram", "data stored");
+		storeData.execute();
+		super.onStop();
+	 }
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {

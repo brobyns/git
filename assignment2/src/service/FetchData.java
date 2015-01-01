@@ -122,8 +122,6 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 	}
 
 	private void getXMLData(){
-		Map<Integer, Member> members = new HashMap<Integer, Member>();
-		Map<Integer, Group> groups = new HashMap<Integer, Group>();
 		XMLParser xmlParser = new XMLParser();
 		InputStream fin = null;
 		try {
@@ -134,10 +132,9 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 			e.printStackTrace();
 		}
 		try {
-			groups = xmlParser.parse(fin).get("groups");
-			groupDB.setGroups(groups);
-			members = xmlParser.parse(fin).get("members");
-			memberDB.addMembers(members);
+			if(fin != null){
+				Map<String, Map> map = xmlParser.parse(fin);
+			}
 		} catch (XmlPullParserException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -162,7 +159,6 @@ public class FetchData extends AsyncTask<Void, Void, Void> implements Subject{
 			facade.writeSettings(context, settings);
 			settingsLoaded = true;
 			memberDB.setCurrMember(member);
-			facade.createMember(member);
 		} catch (XmlPullParserException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

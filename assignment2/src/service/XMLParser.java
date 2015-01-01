@@ -16,11 +16,16 @@ import model.Member;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import db.GroupDB;
+import db.MemberDB;
+
 import android.util.Log;
 import android.util.Xml;
 
 public class XMLParser {
 	private static final String ns = null;
+	private MemberDB memberDB = MemberDB.getInstance();
+	private GroupDB groupDB = GroupDB.getInstance();
 
 	public Map<String, Map> parse(InputStream in) throws XmlPullParserException, IOException {
 		try {
@@ -39,8 +44,12 @@ public class XMLParser {
 				String name = parser.getName();
 				if (name.equals("members")) {
 					members = readMembers(parser);
+					Log.v("bram4", "size members: "+members.values().size()+"");
+					memberDB.addMembers(members);
 				}else if (name.equals("groups")) {
 					groups = readGroups(parser);
+					Log.v("bram4", "size groups: "+groups.values().size()+"");
+					groupDB.setGroups(groups);
 				}else{
 					skip(parser);
 				}
@@ -76,23 +85,21 @@ public class XMLParser {
 		parser.require(XmlPullParser.START_TAG, ns, "group");
 		int id = -1;
 		String groupname = null;
-		List<Member> members = new ArrayList<Member>();
+		List<Member> members = null;
 		while (parser.next() != XmlPullParser.END_TAG) {
 			if (parser.getEventType() != XmlPullParser.START_TAG) {
 				continue;
 			}
 			String name = parser.getName();
-			if (name.equals("groupid")) {
-				id = readId(parser, "groupid");
-			} else if (name.equals("groupname")) {
+			if (name.equals("groupname")) {
 				groupname = readStringValue(parser, "groupname");
 			}else if (name.equals("members")) {
-				//members.add(readMember(parser));
+				members = new ArrayList<Member>(readGroupMembers(parser).values());
 			} else {
 				skip(parser);
 			}	
 		}
-		return new Group(id, groupname, members);
+		return new Group(groupname, members);
 	}
 	
 	private Map<Integer, Member> readMembers(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -114,6 +121,25 @@ public class XMLParser {
 		return members;
 	}
 	
+	private Map<Integer, Member> readGroupMembers(XmlPullParser parser) throws XmlPullParserException, IOException {
+		Map<Integer, Member> members = new HashMap<Integer,Member>();
+
+		parser.require(XmlPullParser.START_TAG, ns, "members");
+		while (parser.next() != XmlPullParser.END_TAG) {
+			if (parser.getEventType() != XmlPullParser.START_TAG) {
+				continue;
+			}
+			String name = parser.getName();
+			if (name.equals("member")) {
+				Member m = readGroupMember(parser);
+				members.put(m.getId(), m);
+			} else {
+				skip(parser);
+			}
+		}  
+		return members;
+	}
+	
 	private Member readMember(XmlPullParser parser) throws XmlPullParserException, IOException {
 		parser.require(XmlPullParser.START_TAG, ns, "member");
 		int id = -1;
@@ -126,23 +152,46 @@ public class XMLParser {
 				continue;
 			}
 			String name = parser.getName();
-			if (name.equals("memberid")) {
-				id = readId(parser, "memberid");
-				Log.v("id", id + "");
-			} else if (name.equals("firstname")) {
+			if (name.equals("firstname")) {
 				firstname = readStringValue(parser, "firstname");
 			} else if(name.equals("lastname")){
 				lastname = readStringValue(parser, "lastname");
 			}else if(name.equals("email")){
 				email = readStringValue(parser, "email");
-			}else if(name.equals("expenses")){
+/*			}else if(name.equals("expenses")){
 				expenses = readExpenses(parser, id);
-			}else{
+*/			}else{
 				skip(parser);
 			}	
 		}
 		Log.v("bram", id+ " " + firstname +" "+ lastname + " " + email);
-		return new Member(id, firstname, lastname, email, expenses);
+		return new Member(firstname, lastname, email);
+	}
+	
+	private Member readGroupMember(XmlPullParser parser) throws XmlPullParserException, IOException {
+		parser.require(XmlPullParser.START_TAG, ns, "member");
+		int id = -1;
+		String firstname = null;
+		String lastname = null;
+		String email = null;	
+		Member m = null;
+		Map<Integer, Expense> expenses = new HashMap<Integer, Expense>();
+		while (parser.next() != XmlPullParser.END_TAG) {
+			if (parser.getEventType() != XmlPullParser.START_TAG) {
+				continue;
+			}
+			String name = parser.getName();
+			if(name.equals("email")){
+				email = readStringValue(parser, "email");
+				m = memberDB.getMembers().get(memberDB.getIdForEmail(email));
+			}else if(name.equals("expenses")){
+				expenses = readExpenses(parser, memberDB.getIdForEmail(email));
+				m.setExpenses(expenses);
+			}else{
+				skip(parser);
+			}	
+		}
+		return m;
 	}
 	
 	private Map<Integer, Expense> readExpenses(XmlPullParser parser, int memberid) throws XmlPullParserException, IOException {
@@ -205,8 +254,8 @@ public class XMLParser {
 				continue;
 			}
 			String name = parser.getName();
-			if (name.equals("receiverid")) {
-				receivers.add(readId(parser,"receiverid"));
+			if (name.equals("email")) {
+				receivers.add(memberDB.getIdForEmail(readStringValue(parser,"email")));
 			} else {
 				skip(parser);
 			}

@@ -31,6 +31,13 @@
 	<string name="error_email">Email address is not valid!</string>
 	<string name="error_alpha">Only alphabetical characters are allowed!</string>
 	<string name="error_amount">Amount is not valid!</string>
+	<string name="error_length">Input length is invalid!</string>
+	<string name="error_no_email_client">There is no email client installed!</string>
+	<string name="error_count">At least 2 members need to be in the group to add an expense!</string>
+	<string name="error_no_recipient">At least 1 member needs to be added as recipient!</string>
+	<string name="error_no_expenses">This group has no expenses yet!</string>
+	<string name="settle_dialog">Settle payments via email and delete this group?</string>
+	<string name="ok">OK</string>
 	<string name="admin">Admin: </string>
 	<string name="total_balance">Total Balance: </string>
 	<string name="add_recipient">Add recipient</string>
@@ -48,4 +55,5 @@
 	<string name="recipients">Recipients: </string>
 	<string name="no_members">No members yet</string>
 	<string name="take_photo">Add a photo</string>
+	<string name="loading_text">Loading...</string>
 </resources>
